@@ -167,16 +167,16 @@ class RewardsApp {
     if(!tasks.length)return this.filter===category?this.empty('Nothing here just yet','Check back for new tasks.'):'';
     const meta={daily:['Daily tasks','sun','Fresh goals, every day.'],limited:['Limited editions','crown','A little something out of the ordinary.'],social:['Stay connected','users','Good company comes with good things.']}[category];
     const deadlines=tasks.filter(t=>t.expiresAt&&!COMPLETE.has(t.state)&&t.state!=='expired').map(t=>t.expiresAt).sort();
-    return `<section class="task-group group-${category}" aria-label="${meta[0]}"><div class="group-heading"><div><h2><span class="heading-mark">${icon3d(meta[1])}</span>${meta[0]}</h2><p>${meta[2]}</p></div>${deadlines.length?`<span class="time-pill">${icon('clock')}<span data-deadline="${esc(deadlines[0])}">${remaining(deadlines[0],this.now())}</span></span>`:''}</div><div class="task-list">${tasks.map(t=>this.taskCard(this.item(t.id))).join('')}</div></section>`;
+    return `<section class="task-group group-${category}" aria-label="${meta[0]}"><div class="group-heading"><div><h2><span class="heading-mark">${icon3d(meta[1])}</span>${meta[0]}</h2><p>${meta[2]}</p></div>${deadlines.length?`<span class="time-pill">${icon('clock')}<span data-deadline="${esc(deadlines[0])}">${remaining(deadlines[0],this.now())}</span></span>`:''}</div><div class="task-list${tasks.length===1?' solo':''}">${tasks.map(t=>this.taskCard(this.item(t.id))).join('')}</div></section>`;
   }
   taskCard(t) {
     const action=taskAction(t,this.now()),percent=Math.min(100,t.progress/t.target*100);
     const ready=t.state==='verified'&&t.canClaim;
-    return `<article class="task-card color-${esc(t.icon)} ${ready?'ready':''} ${COMPLETE.has(t.state)?'is-complete':''} ${t.category==='limited'?'limited-card':''}" data-card="${esc(t.id)}">
-      <button class="task-art" data-details="${esc(t.id)}" aria-label="Details: ${esc(t.title)}">${taskGift(t.icon)}</button>
-      <div class="task-info">${t.featured?'<span class="featured-tag">SPECIAL DROP</span>':''}<h3><button data-details="${esc(t.id)}">${esc(t.title)}</button></h3><p>${esc(t.description)}</p><span class="reward-pill">${icon3d('star')}+${rewardText(t.reward)}<small>${esc(t.reward.unit)}</small></span></div>
-      <div class="task-action"><button class="${ready?'claim-btn':'task-btn'}" data-task-action="${esc(t.id)}" ${action.disabled?'disabled':''}>${icon(ready?'gift':action.kind==='navigate'?'arrow':action.disabled?'check':action.kind==='refresh'?'refresh':'check-circle')}<span>${action.label}</span></button></div>
+    return `<article class="task-card cat-${esc(t.category)} color-${esc(t.icon)} ${ready?'ready':''} ${COMPLETE.has(t.state)?'is-complete':''} ${t.category==='limited'?'limited-card':''}" data-card="${esc(t.id)}">
+      <button class="task-art" data-details="${esc(t.id)}" aria-label="Details: ${esc(t.title)}"><span class="art-shelf" aria-hidden="true"></span>${taskGift(t.icon)}<span class="reward-pill">${icon3d('star')}+${rewardText(t.reward)}<small>${esc(t.reward.unit)}</small></span>${t.featured?'<span class="featured-tag">SPECIAL DROP</span>':''}</button>
+      <div class="task-info"><h3><button data-details="${esc(t.id)}">${esc(t.title)}</button></h3><p>${esc(t.description)}</p></div>
       <div class="task-progress"><span class="status-label ${ready?'status-ready':''} ${t.state==='server_error'||t.state==='rejected'?'status-error':''}">${['available','in_progress'].includes(t.state)?`Progress <strong>${t.progress}/${t.target}</strong>`:LABELS[t.state]}</span><div class="progress-track" role="progressbar" aria-label="${esc(t.title)}" aria-valuemin="0" aria-valuemax="${t.target}" aria-valuenow="${Math.min(t.progress,t.target)}"><span style="width:${percent}%"></span></div></div>
+      <div class="task-action"><button class="${ready?'claim-btn':'task-btn'}" data-task-action="${esc(t.id)}" ${action.disabled?'disabled':''}>${icon(ready?'gift':action.kind==='navigate'?'arrow':action.disabled?'check':action.kind==='refresh'?'refresh':'check-circle')}<span>${action.label}</span></button></div>
     </article>`;
   }
   achievementsView() {
