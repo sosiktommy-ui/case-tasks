@@ -58,3 +58,108 @@ body{background:radial-gradient(ellipse at 18% 10%,#58209933,transparent 38%),ra
 @media(min-width:420px){.hero{min-height:216px}.hero h2,.hero h2 span{font-size:33px}.hero-copy{padding-left:20px}.hero-art{width:246px;height:233px;right:-58px}.task-card{grid-template-columns:67px minmax(0,1fr) auto;padding:14px}.task-art{width:67px;height:68px}.task-art>img{width:66px;height:66px}.task-info h3{font-size:16px}.task-info p{font-size:12px}.real-gift img{height:110px}}
 @media(max-width:360px){.case-app main{padding-left:12px;padding-right:12px}.hero h2,.hero h2 span{font-size:26px}.hero-art{width:195px;height:204px;right:-55px}.hero-copy{padding-left:13px}.hero{min-height:198px}.task-card{grid-template-columns:56px minmax(0,1fr) auto;gap:10px;padding:11px}.task-art{width:56px;height:60px}.task-art>img{width:55px;height:57px}.task-info h3{font-size:14px}.task-info p{font-size:10.5px}.task-btn{padding:9px 10px!important}.gift-tile{width:57px;height:59px}}
 @media(prefers-reduced-motion:reduce){.task-art>img{transition:none}.task-art:hover>img{transform:none}}
+
+/* v6 depth layer: solid 3D marks, lit surfaces, physical button feedback.
+   Layered on top of the approved v5 structure — no task, filter or
+   achievement is moved or removed here. */
+.i3d{width:1em;height:1em;display:block;flex-shrink:0;overflow:visible}
+@keyframes case-spin{to{transform:rotate(360deg)}}
+@keyframes case-float{0%,100%{transform:translateY(-3px)}50%{transform:translateY(5px)}}
+@keyframes case-shine{0%{left:-45%}58%,100%{left:135%}}
+@keyframes case-pulse{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:.9;transform:scale(1.08)}}
+.brand{gap:11px}
+.brand-mark{position:relative;width:38px;height:38px;display:grid;place-items:center;border-radius:11px;flex-shrink:0;background:linear-gradient(162deg,#262838,#14151d);border:1px solid #3c4055;box-shadow:inset 0 1px 0 #ffffff1f,0 5px 14px #000000a6,0 0 22px #2f8fff29}
+.brand-mark:before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse at 50% 0,#3fa9ff30,transparent 72%)}
+.brand-mark .i3d{position:relative;width:25px;height:25px;filter:drop-shadow(0 2px 3px #000000a6)}
+.main-tabs>button{gap:8px}
+.main-tabs>button .i3d{width:19px;height:19px;filter:drop-shadow(0 2px 2px #000000a6)}
+.main-tabs>button[aria-selected=true]{box-shadow:inset 0 1px 0 #ddc4ffa8,0 3px 0 #3a1d86,0 8px 18px #4a1fb04d}
+.main-tabs>button:active{transform:translateY(1px)}
+.journey{gap:12px;padding:15px 0 14px;align-items:center}
+.journey-icon{position:relative;width:50px;height:50px;border-radius:50%;overflow:visible;background:radial-gradient(circle at 50% 56%,#ffae1f3d,transparent 68%);border:0;box-shadow:none}
+.art3d{object-fit:contain;display:block}
+.journey-icon .art3d{width:54px;height:54px;margin:-2px;filter:drop-shadow(0 5px 6px #000000b3) drop-shadow(0 0 13px #ffae1f6b);animation:case-float 5.5s ease-in-out infinite}
+.heading-mark.mark-art{background:radial-gradient(circle at 50% 56%,#ffae1f38,transparent 68%);border:0;box-shadow:none;border-radius:50%}
+.heading-mark.mark-art .art3d{width:36px;height:36px;filter:drop-shadow(0 3px 4px #000000a6)}
+.journey-icon:before{content:"";position:absolute;inset:-7px;border-radius:19px;background:radial-gradient(circle,#ffb01f2e,transparent 70%);animation:case-pulse 3.4s ease-in-out infinite}
+
+.journey-copy{min-width:0}
+.journey-copy strong{font-size:13px;letter-spacing:-.2px}
+.journey-meter{margin-left:auto;display:flex;align-items:center;gap:9px}
+.journey-dots{margin-left:0;gap:5px}
+.journey-dots>span{width:17px;height:8px;border-radius:4px;background:linear-gradient(#2b2832,#1a181f);box-shadow:inset 0 1px 2px #000000a6,inset 0 -1px 0 #ffffff0d}
+.journey-dots>span.done{background:linear-gradient(#ffe68d,#ffae1f);box-shadow:inset 0 1px 0 #fff7d3,0 0 11px #ffae1f8c,0 1px 2px #000000a6}
+.journey-pct{font-size:11px;font-weight:800;color:#ffcf5a;font-variant-numeric:tabular-nums;min-width:29px;text-align:right}
+.journey-full .journey-pct{color:#7df0c6}
+.filter-bar{position:sticky;top:0;z-index:7;gap:6px;margin:0 -12px;padding:10px 12px;background:linear-gradient(#131313f5,#131313e6 62%,#13131300);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.filter-bar button{position:relative;flex:1;min-width:0;gap:7px;padding:9px 7px;min-height:44px;border-radius:12px;background:linear-gradient(170deg,#272530,#1a191f);border:1px solid #3b3844;color:#a9a7b6;font-weight:700;box-shadow:inset 0 1px 0 #ffffff12,0 3px 0 #0d0c10,0 5px 12px #0000005c;transition:transform .14s,box-shadow .14s,background .18s,color .18s,border-color .18s}
+.filter-bar button:hover{color:#ece8f7;border-color:#56505f;transform:translateY(-1px)}
+.filter-bar button:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #ffffff10,0 1px 0 #0d0c10}
+.filter-bar button[aria-pressed=true]{background:linear-gradient(170deg,#8d5fff,#5f34e0);border-color:#ac86ff;color:#fff;box-shadow:inset 0 1px 0 #e5cfffa6,0 3px 0 #351a8a,0 8px 18px #5a2ad152}
+.chip-art{display:grid;place-items:center;width:20px;height:20px;flex-shrink:0}
+.chip-art .i3d{width:20px;height:20px;filter:drop-shadow(0 2px 2px #000000a6)}
+.filter-bar button>.chip-label{background:none;padding:0;border-radius:0;letter-spacing:-.1px;font-size:11px;font-weight:700;color:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filter-bar button>.chip-count{position:absolute;top:-6px;right:-4px;padding:2px 5px;min-width:17px;border-radius:7px;background:linear-gradient(#ff6aa8,#e0327c);border:1px solid #ffa8ca;color:#fff;font-size:9px;font-weight:800;line-height:1.2;box-shadow:0 2px 6px #00000080}
+.filter-bar button[aria-pressed=true]>.chip-count{background:linear-gradient(#ffe68d,#ffae1f);border-color:#fff3c6;color:#4a2c02}
+.group-heading h2{gap:10px}
+.heading-mark{display:grid;place-items:center;width:34px;height:34px;flex-shrink:0;border-radius:11px;background:linear-gradient(165deg,#272530,#17161c);border:1px solid #3d3a48;box-shadow:inset 0 1px 0 #ffffff14,0 4px 10px #00000073}
+.heading-mark .i3d{width:24px;height:24px;filter:drop-shadow(0 2px 3px #000000a6)}
+.group-daily .heading-mark{background:linear-gradient(165deg,#342b17,#1a1710);border-color:#6d5020;box-shadow:inset 0 1px 0 #ffd77a3d,0 4px 10px #00000073,0 0 20px #ffae1f2b}
+.group-limited .heading-mark{background:linear-gradient(165deg,#331b2a,#1a1017);border-color:#7c3663;box-shadow:inset 0 1px 0 #ffa8d63d,0 4px 10px #00000073,0 0 20px #ff57b42b}
+.group-social .heading-mark{background:linear-gradient(165deg,#15302a,#0f1a17);border-color:#236b57;box-shadow:inset 0 1px 0 #7df0c63d,0 4px 10px #00000073,0 0 20px #2fd6a22b}
+.task-card{border-radius:12px;box-shadow:inset 0 1px 0 #ffffff0d,0 4px 0 #0d0c10,0 10px 22px #00000059;transition:transform .16s,border-color .18s,box-shadow .18s,background .18s}
+.task-card:before{content:"";position:absolute;left:14px;right:14px;top:0;height:1px;background:linear-gradient(90deg,transparent,#ffffff30,transparent);pointer-events:none}
+.task-card:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 #ffffff17,0 6px 0 #0d0c10,0 14px 28px #00000073}
+.task-card.ready{box-shadow:inset 0 1px 0 #ffffff12,0 4px 0 #0d1a16,0 10px 26px #126c5233}
+.task-card.limited-card{box-shadow:inset 0 1px 0 #ffffff12,0 4px 0 #170f21,0 10px 26px #6e35a833}
+.task-art{position:relative;box-shadow:inset 0 2px 7px #00000080,inset 0 -1px 0 #ffffff0f,0 0 18px rgba(var(--accent-rgb,143,93,255),.14)}
+.task-art:before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse at 50% 118%,rgba(var(--accent-rgb,143,93,255),.4),transparent 68%);pointer-events:none}
+.task-art>img{position:relative}
+.reward-pill .i3d{width:15px;height:15px;filter:drop-shadow(0 1px 2px #000000a6)}
+.progress-track{box-shadow:inset 0 1px 2px #000000a6}
+.progress-track>span{box-shadow:0 0 10px #8a5cff7a}
+.ready .progress-track>span{box-shadow:0 0 10px #45c59c99}
+.task-action .task-btn,.task-action .claim-btn,.primary-btn{box-shadow:inset 0 1px 0 #ffffff45,0 3px 0 #2c1a5e,0 6px 14px #0000005c;transition:transform .12s,box-shadow .12s,background .18s}
+.task-action .claim-btn{box-shadow:inset 0 1px 0 #dbfff36b,0 3px 0 #17564180,0 6px 14px #0000005c}
+.task-action .task-btn:active,.task-action .claim-btn:active,.primary-btn:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #ffffff30,0 1px 0 #2c1a5e}
+.claim-btn{position:relative;overflow:hidden}
+.claim-btn:after{content:"";position:absolute;top:-60%;left:-45%;width:26%;height:220%;transform:rotate(18deg);background:linear-gradient(90deg,#ffffff00,#ffffffa6,#ffffff00);animation:case-shine 3s ease-in-out infinite;pointer-events:none}
+.sheet{border-color:#4a3f5e;box-shadow:0 -24px 70px #000000cc,inset 0 1px 0 #ffffff14}
+.sheet-hero{position:relative;display:grid;place-items:center;height:176px;margin:0 0 15px;border-radius:14px;overflow:hidden;border:1px solid #3c3450;background:radial-gradient(ellipse at 50% 122%,#2b2142,transparent 68%),linear-gradient(#1c1b26,#141420);box-shadow:inset 0 1px 0 #ffffff14}
+.sheet-halo{position:absolute;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,#8a5cff5c,#8a5cff00 66%)}
+.sheet-beam{position:absolute;width:280px;height:280px;background:repeating-conic-gradient(from 0deg,#ffffff12 0deg 4deg,transparent 4deg 16deg);-webkit-mask-image:radial-gradient(circle,#000 8%,transparent 66%);mask-image:radial-gradient(circle,#000 8%,transparent 66%);animation:case-spin 26s linear infinite}
+.sheet-plinth{position:absolute;z-index:1;bottom:26px;width:118px;height:22px;border-radius:50%;background:radial-gradient(ellipse at 50% 32%,#ffffff33,transparent 62%),linear-gradient(#5b46a2,#241c42);box-shadow:0 10px 22px #000000a6,inset 0 1px 0 #cdb6ff6b}
+.sheet-hero .detail-art{position:relative;z-index:2;width:120px;height:120px;margin:0 0 14px;padding:0;border:0;background:none;box-shadow:none;animation:case-float 5.5s ease-in-out infinite}
+.sheet-hero .detail-art img{width:120px;height:120px;filter:drop-shadow(0 14px 11px #000000a6)}
+.sheet-hero.hero-limited{border-color:#6d3358;background:radial-gradient(ellipse at 50% 122%,#3a1c31,transparent 68%),linear-gradient(#241a22,#16121b)}
+.sheet-hero.hero-limited .sheet-halo{background:radial-gradient(circle,#ff57b45c,#ff57b400 66%)}
+.sheet-hero.hero-limited .sheet-plinth{background:radial-gradient(ellipse at 50% 32%,#ffffff33,transparent 62%),linear-gradient(#a4407f,#3c1730)}
+.sheet-hero.hero-social{border-color:#245f4e;background:radial-gradient(ellipse at 50% 122%,#143028,transparent 68%),linear-gradient(#171f1e,#111618)}
+.sheet-hero.hero-social .sheet-halo{background:radial-gradient(circle,#2fd6a252,#2fd6a200 66%)}
+.sheet-hero.hero-social .sheet-plinth{background:radial-gradient(ellipse at 50% 32%,#ffffff33,transparent 62%),linear-gradient(#2a8a70,#10362c)}
+.sheet-hero.hero-done{border-color:#2d6b57}
+.sheet-hero.hero-done .sheet-halo{background:radial-gradient(circle,#7df0c64f,#7df0c600 66%)}
+.detail-eyebrow{color:#c6acea}
+.detail-reward{background:linear-gradient(150deg,#17293c,#141a2b);border-color:#40658c;box-shadow:inset 0 1px 0 #ffffff14,0 6px 16px #0000005c}
+.detail-reward .i3d{width:24px;height:24px;filter:drop-shadow(0 2px 3px #000000a6)}
+.detail-progress strong{font-variant-numeric:tabular-nums}
+.menu-grid button{background:linear-gradient(165deg,#282631,#1a1922);border-color:#3e3b4a;box-shadow:inset 0 1px 0 #ffffff12,0 4px 0 #0d0c10,0 8px 16px #00000059;transition:transform .14s,box-shadow .14s,background .18s}
+.menu-grid button:first-child{background:linear-gradient(165deg,#3a2456,#221436);border-color:#8c58cf;box-shadow:inset 0 1px 0 #d9b6ff33,0 4px 0 #1b0f2c,0 8px 18px #5a2ad13d}
+.menu-grid button:hover{transform:translateY(-2px)}
+.menu-grid button:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #ffffff10,0 1px 0 #0d0c10}
+.menu-grid .i3d{width:32px;height:32px;filter:drop-shadow(0 3px 4px #000000a6)}
+.state-panel .i3d{width:54px;height:54px;margin:0 auto 10px}
+.achievement-card{box-shadow:inset 0 1px 0 #ffffff0d,0 4px 0 #0d0c10,0 10px 22px #00000059;transition:transform .16s,box-shadow .16s,border-color .18s}
+.achievement-card:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 #ffffff17,0 6px 0 #0d0c10,0 14px 28px #00000073}
+.achievement-card.unlocked{box-shadow:inset 0 1px 0 #ffe9a82e,0 4px 0 #1a1408,0 10px 26px #7a5a1233}
+.achievement-art{position:relative}
+.achievement-art:after{content:"";position:absolute;left:50%;bottom:6px;width:62px;height:12px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,#00000099,transparent 70%);pointer-events:none}
+.achievement-button{transition:transform .12s,background .18s}
+.achievement-button:active{transform:translateY(1px)}
+.public-task{box-shadow:inset 0 1px 0 #ffffff0f,0 4px 0 #0d0c10,0 10px 22px #00000059}
+.discovery-banner{box-shadow:inset 0 1px 0 #ffffff14,0 4px 0 #0b1a26,0 10px 24px #00000059;transition:transform .16s,box-shadow .16s}
+.discovery-banner:hover{transform:translateY(-2px)}
+.discovery-banner:active{transform:translateY(2px)}
+@media(prefers-reduced-motion:reduce){.sheet-beam,.claim-btn:after,.sheet-hero .detail-art,.journey-icon:before,.journey-icon .art3d{animation:none}}
+@media(max-width:430px){.filter-bar button{gap:5px;padding:9px 6px}.chip-art,.chip-art .i3d{width:18px;height:18px}}
+@media(max-width:359px){.filter-bar button{gap:4px;padding:9px 5px}.filter-bar button>.chip-label{font-size:10px}.chip-art,.chip-art .i3d{width:17px;height:17px}.journey-icon{width:46px;height:46px}.journey-icon .art3d{width:50px;height:50px}}
