@@ -1,8 +1,8 @@
-import { gifts, giftImage } from './gifts.js?v=6';
-import { icon } from './icons.js?v=6';
-import { icon3d } from './icons3d.js?v=6';
-import { collectible } from './art.js?v=6';
-import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=6';
+import { gifts, giftImage } from './gifts.js?v=7';
+import { icon } from './icons.js?v=7';
+import { icon3d } from './icons3d.js?v=7';
+import { collectible } from './art.js?v=7';
+import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=7';
 
 const ASSET = new URL('../assets/reward-gift-v2.png', import.meta.url).href;
 const GOLD = new URL('../assets/collectible-trio.png', import.meta.url).href;
