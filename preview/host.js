@@ -3,12 +3,12 @@ export function createPreviewHost() {
   const now = Date.now();
   const until = hours => new Date(now + hours * 3600000).toISOString();
   const task = (id, title, description, icon, progress, target, amount, extras = {}) => ({
-    id, title, description, icon, progress, target, reward:{amount:String(amount), unit:'POINTS'},
+    id, title, description, icon, progress, target, reward:{amount:String(amount), unit:'TON'},
     state:progress ? 'in_progress' : 'available', canClaim:false, canVerify:false,
     category:'daily', expiresAt:until(10.82), ...extras
   });
   const data = {
-    revision:1, serverNow:new Date(now).toISOString(), balance:{amount:'1250',unit:'POINTS'},
+    revision:1, serverNow:new Date(now).toISOString(), balance:{amount:'0.066',unit:'TON'},
     tasks:[
       task('daily-rounds','Complete 5 rounds','Play your favourite games. Each completed round counts.','rocket',2,5,50,{route:'home'}),
       task('daily-crash','Explore Crash','Complete 3 rounds in Crash.','gamepad',0,3,30,{route:'crash'}),

@@ -113,6 +113,16 @@ const SHAPES = {
       <circle cx="39.8" cy="18.6" r="1.6" fill="#EAFDFF"/>
       <path d="M13.4 47.4 4.6 59.2l11.8-8.4Z" fill="#FFB43C"/>`
   },
+  ton: {
+    tone:'cyan', rim:2.6,
+    body:'<circle cx="32" cy="32" r="28.6"/>',
+    top:`<path d="M18.6 19.4h26.8a2.2 2.2 0 0 1 1.9 3.3L33.9 46.4a2.2 2.2 0 0 1-3.8 0L16.7 22.7a2.2 2.2 0 0 1 1.9-3.3Z" fill="#FFFFFF"/>
+    <g stroke="#1B7CD4" stroke-width="2.1" fill="none">
+      <path d="M32 20.4v24.6"/><path d="m24.4 20.4 7.6 13.2 7.6-13.2"/>
+    </g>
+    <path d="M20.4 22.2h23.2l-1.7 3H22.1Z" fill="#CFEBFF" opacity=".5"/>
+    <ellipse cx="21.6" cy="16.6" rx="7.6" ry="4.4" fill="#FFFFFF" opacity=".32" transform="rotate(-30 21.6 16.6)"/>`
+  },
   send: {
     tone:'cyan', rim:2.6,
     body:'<path d="M58.4 5.2a2.2 2.2 0 0 1 2.9 2.8L45.8 57.4a2.4 2.4 0 0 1-4.2.7l-9.8-14.4-10.2 9.1a1.4 1.4 0 0 1-2.3-1.2l1.7-16.9Z"/>',

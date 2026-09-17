@@ -219,3 +219,8 @@ body{background:radial-gradient(ellipse at 18% 10%,#58209933,transparent 38%),ra
 .task-list.solo .task-progress{grid-area:progress;align-self:end;padding:10px 13px 0}
 .task-list.solo .task-action{grid-area:act;padding:11px 13px 13px}
 .task-list.solo .task-card:after{height:88px}
+/* TON mark: the coin carries its own body, so the plate steps back */
+.token-token{background:none;border:0;box-shadow:none;width:40px;height:40px;overflow:visible}
+.token-token .i3d{width:40px;height:40px;filter:drop-shadow(0 4px 6px #000000a6) drop-shadow(0 0 12px #1e9cf066)}
+.reward-pill .i3d,.task-card .task-art .reward-pill .i3d{width:15px;height:15px}
+.detail-reward .i3d{width:26px;height:26px}
