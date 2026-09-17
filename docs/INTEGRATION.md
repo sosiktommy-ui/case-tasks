@@ -4,7 +4,7 @@
 
 Set window.CASE_TASKS_HOST before scripts/main.js starts. Or import mountCaseTasks from scripts/app.js and pass {host, embedded:true}. It returns destroy(), refresh() and setHost(host). Destroy on unmount. On account changes use setHost with a new authenticated host; this aborts old requests and clears previous account data.
 
-The default index uses no fixture fallback. When no host exists, it displays public discovery and Open CASE links. preview.html is a separate review-only entry. No demo data is imported by index.html or embed.html.
+index.html preserves the full approved Tasks structure. Without a host it loads the preview account, labelled Preview balance, and disables mutations. With a supplied host it uses authenticated data. embed.html is the production integration entry and never imports fixtures; use it for CASE. preview.html remains a separately labelled review entry.
 
 ## Host methods
 

@@ -4,8 +4,8 @@ English frontend for CASE Tasks and Achievements. Charcoal CASE shell, shared an
 
 ## Entries
 
-- index.html: production entry. No sample account, balance, task progress or rewards. Without a CASE host, shows a public discovery view and working links to the official Mini App and gift pages.
-- embed.html: production entry for integration into CASE. Same behavior; pass CASE_TASKS_EMBEDDED=true when the host already renders its shell and gift rail.
+- index.html: full Tasks and Achievements page. The approved task list, filters, progress and reward cards are always visible. Without a CASE host it uses clearly indicated preview account data; real claims are disabled. With a host it displays authenticated server data.
+- embed.html: production integration entry without preview fallback. Pass CASE_TASKS_EMBEDDED=true when the host already renders its shell and gift rail.
 - preview.html: isolated, explicitly labelled design review with sample tasks. Never imported by the production entry.
 
 The full task interface switches on when the developer provides window.CASE_TASKS_HOST. API integration, identity, wallet operations and real reward issuing belong to CASE. No server credentials are needed in this page.
