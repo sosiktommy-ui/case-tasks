@@ -1,8 +1,8 @@
-import { gifts, giftImage } from './gifts.js?v=7';
-import { icon } from './icons.js?v=7';
-import { icon3d } from './icons3d.js?v=7';
-import { collectible } from './art.js?v=7';
-import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=7';
+import { gifts, giftImage } from './gifts.js?v=8';
+import { icon } from './icons.js?v=8';
+import { icon3d } from './icons3d.js?v=8';
+import { collectible } from './art.js?v=8';
+import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=8';
 
 const ASSET = new URL('../assets/reward-gift-v2.png', import.meta.url).href;
 const GOLD = new URL('../assets/collectible-trio.png', import.meta.url).href;
@@ -157,7 +157,7 @@ class RewardsApp {
     const completed=daily.filter(t=>COMPLETE.has(t.state)).length;
     return `${this.connectionError?'<div class="sync-warning" role="status">Showing your last confirmed progress. <button data-action="refresh">Refresh</button></div>':''}
       <div class="journey${completed&&completed===daily.length?' journey-full':''}"><span class="journey-icon">${boltArt()}</span><div class="journey-copy"><strong>Your daily journey</strong><small>${completed} of ${daily.length} rewards collected</small></div><div class="journey-meter"><div class="journey-dots" aria-label="${completed} of ${daily.length} daily tasks claimed">${daily.slice(0,12).map(t=>`<span class="${COMPLETE.has(t.state)?'done':''}">${COMPLETE.has(t.state)?icon('check'):''}</span>`).join('')}</div><span class="journey-pct">${daily.length?Math.round(completed/daily.length*100):0}%</span></div></div>
-      <div class="filter-bar" role="group" aria-label="Filter tasks">${[['all','All','grid','steel'],['daily','Daily','sun','cyan'],['limited','Limited','crown','violet'],['social','Social','users','teal']].map(([id,label,art,tone])=>{const open=this.data.tasks.filter(t=>(id==='all'||t.category===id)&&!COMPLETE.has(t.state)&&t.state!=='expired').length;return `<button data-action="filter" data-filter="${id}" aria-pressed="${this.filter===id}"><i class="chip-art">${icon3d(art,'',tone)}</i><span class="chip-label">${label}</span>${open?`<span class="chip-count">${open}</span>`:''}</button>`;}).join('')}</div>
+      <div class="filter-bar" role="group" aria-label="Filter tasks">${[['all','All','grid','steel'],['daily','Daily','sun','azure'],['limited','Limited','crown','indigo'],['social','Social','users','teal']].map(([id,label,art,tone])=>{const open=this.data.tasks.filter(t=>(id==='all'||t.category===id)&&!COMPLETE.has(t.state)&&t.state!=='expired').length;return `<button data-action="filter" data-filter="${id}" aria-pressed="${this.filter===id}"><i class="chip-art">${icon3d(art,'',tone)}</i><span class="chip-label">${label}</span>${open?`<span class="chip-count">${open}</span>`:''}</button>`;}).join('')}</div>
       <div id="task-groups">${['daily','limited','social'].filter(c=>this.filter==='all'||this.filter===c).map(c=>this.group(c)).join('')||this.empty('No tasks here yet','New things to do will appear here.')}</div>
       ${this.giftGallery()}
       <button class="discovery-banner" data-action="achievements"><span class="discovery-art"><img src="${BUNNY}" width="90" height="95" alt="" loading="lazy"></span><span><small>GO A LITTLE FURTHER</small><strong>Some things are worth unlocking.</strong><span>Discover your achievements ${icon('arrow')}</span></span></button>`;
@@ -165,7 +165,7 @@ class RewardsApp {
   group(category) {
     const tasks=this.data.tasks.filter(t=>t.category===category);
     if(!tasks.length)return this.filter===category?this.empty('Nothing here just yet','Check back for new tasks.'):'';
-    const meta={daily:['Daily tasks','sun','Fresh goals, every day.','cyan'],limited:['Limited editions','crown','A little something out of the ordinary.','violet'],social:['Stay connected','users','Good company comes with good things.','teal']}[category];
+    const meta={daily:['Daily tasks','sun','Fresh goals, every day.','azure'],limited:['Limited editions','crown','A little something out of the ordinary.','indigo'],social:['Stay connected','users','Good company comes with good things.','teal']}[category];
     const deadlines=tasks.filter(t=>t.expiresAt&&!COMPLETE.has(t.state)&&t.state!=='expired').map(t=>t.expiresAt).sort();
     return `<section class="task-group group-${category}" aria-label="${meta[0]}"><div class="group-heading"><div><h2><span class="heading-mark">${icon3d(meta[1],'',meta[3])}</span>${meta[0]}</h2><p>${meta[2]}</p></div>${deadlines.length?`<span class="time-pill">${icon('clock')}<span data-deadline="${esc(deadlines[0])}">${remaining(deadlines[0],this.now())}</span></span>`:''}</div><div class="task-list${tasks.length===1?' solo':''}">${tasks.map(t=>this.taskCard(this.item(t.id))).join('')}</div></section>`;
   }

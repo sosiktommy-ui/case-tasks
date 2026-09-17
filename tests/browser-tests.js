@@ -73,7 +73,7 @@ export async function runTests() {
       const data=sample();data.tasks[0].id=prefix+'-verify';data.tasks[0].state='available';data.tasks[0].canVerify=true;data.tasks[0].canClaim=false;
       const host=hostFor(data);host.verifyTask=async()=>{data.tasks[0].state='rejected';data.revision++;return structuredClone(data);};
       await mount(host);root.querySelector('[data-task-action]').click();await wait(()=>root.textContent.includes('Not verified yet'));
-      assert(root.querySelector('#balance-value').textContent.includes('1,250'),'Verification changed balance');
+      assert(root.querySelector('#balance-value').textContent.includes(rewardText(base.balance)),'Verification changed balance');
     });
     await test('Stale revisions cannot roll back account data',async()=>{
       const data=sample();data.revision=10;data.balance.amount='2000';const host=hostFor(data);await mount(host);

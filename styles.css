@@ -224,3 +224,39 @@ body{background:radial-gradient(ellipse at 18% 10%,#58209933,transparent 38%),ra
 .token-token .i3d{width:40px;height:40px;filter:drop-shadow(0 4px 6px #000000a6) drop-shadow(0 0 12px #1e9cf066)}
 .reward-pill .i3d,.task-card .task-art .reward-pill .i3d{width:15px;height:15px}
 .detail-reward .i3d{width:26px;height:26px}
+
+/* v8: CASE blue is the primary accent. Violet stays only where a second
+   tier is genuinely needed (limited editions), shifted towards indigo so
+   the whole page reads blue. */
+.main-tabs>button[aria-selected=true]{background:linear-gradient(120deg,#46c2ff,#0b7be0);box-shadow:inset 0 1px 0 #cdeeffa8,0 3px 0 #054a86,0 8px 18px #0b7be04d}
+.filter-bar button[aria-pressed=true]{background:linear-gradient(170deg,#46c2ff,#0b78dc);border-color:#7ad6ff;color:#fff;box-shadow:inset 0 1px 0 #d6f2ffa6,0 3px 0 #054a86,0 8px 18px #0b7be052}
+.filter-bar button[aria-pressed=true]>.chip-count{background:#fff;border-color:#fff;color:#075a9e}
+.filter-bar button[data-filter=daily]{--chip-rgb:47,168,255}
+.filter-bar button[data-filter=limited]{--chip-rgb:126,140,255}
+.task-card{--tone:#2fa8ff;--tone-rgb:47,168,255;--tone-deep:#064a8c;--tone-lite:#ade0ff;--tone-a:#46c2ff;--tone-b:#0b6ec4}
+.cat-daily{--tone:#2fa8ff;--tone-rgb:47,168,255;--tone-deep:#064a8c;--tone-lite:#ade0ff;--tone-a:#46c2ff;--tone-b:#0b6ec4}
+.cat-limited{--tone:#6e7bff;--tone-rgb:110,123,255;--tone-deep:#252c9e;--tone-lite:#c3cbff;--tone-a:#7d8bff;--tone-b:#2c33ab}
+.cat-social{--tone:#2fd0e6;--tone-rgb:47,208,230;--tone-deep:#075a68;--tone-lite:#a9eef8;--tone-ink:#032a31;--tone-a:#63e2f2;--tone-b:#1595b0}
+.task-card.ready{--tone:#3ccb9d;--tone-rgb:60,203,157;--tone-deep:#0c5b45;--tone-lite:#a9f5da;--tone-ink:#062b21;--tone-a:#8dfbcd;--tone-b:#25b184}
+.group-limited .heading-mark{background:linear-gradient(165deg,#1a1f45,#101220);border-color:#3f47a8;box-shadow:inset 0 1px 0 #c3cbff3d,0 4px 10px #00000073,0 0 20px #5b72ff2b}
+.task-art .featured-tag{background:linear-gradient(#5fd4ff,#0d82d8);color:#fff;border:1px solid #a7e5ff66}
+.journey-pct{color:#7fd3ff}
+.primary-btn{background:linear-gradient(162deg,#46c2ff,#0b6ec4);border:1px solid #8fdcff59;box-shadow:inset 0 1px 0 #ffffff4d,0 3px 0 #054a86,0 6px 14px #0000005c}
+.primary-btn:hover{background:linear-gradient(162deg,#5fd0ff,#1180da)}
+.progress-track>span{background:linear-gradient(90deg,#0b6ec4,#46c2ff);box-shadow:0 0 10px #2fa8ff7a}
+.achievement-progress .progress-track>span{background:linear-gradient(90deg,#1180da,#7fd3ff)}
+.achievement-card{border-color:#2a3a51;background:radial-gradient(ellipse at 50% 0,#12365925,transparent 60%),#1c1f26}
+.achievement-card.unlocked{border-color:#2f6fa8}
+.sheet{background:radial-gradient(ellipse at 50% 0,#14304d 0,transparent 70%),#141522}
+.sheet-hero{border-color:#2f4362;background:radial-gradient(ellipse at 50% 122%,#17324f,transparent 68%),linear-gradient(#1b1e28,#141520)}
+.sheet-halo{background:radial-gradient(circle,#2fa8ff5c,#2fa8ff00 66%)}
+.sheet-plinth{background:radial-gradient(ellipse at 50% 32%,#ffffff33,transparent 62%),linear-gradient(#2c72b4,#123049)}
+.sheet-hero.hero-limited{border-color:#3d45a0;background:radial-gradient(ellipse at 50% 122%,#1e2352,transparent 68%),linear-gradient(#1c1d2c,#13141f)}
+.sheet-hero.hero-limited .sheet-halo{background:radial-gradient(circle,#6e7bff5c,#6e7bff00 66%)}
+.sheet-hero.hero-limited .sheet-plinth{background:radial-gradient(ellipse at 50% 32%,#ffffff33,transparent 62%),linear-gradient(#4954c4,#1b1f5e)}
+.detail-eyebrow{color:#9fd3f5}
+.menu-grid button:first-child{background:linear-gradient(165deg,#123c5e,#0d1e2e);border-color:#2f8ccf;box-shadow:inset 0 1px 0 #a9e4ff33,0 4px 0 #0a1a26,0 8px 18px #0b7be03d;color:#bfe7ff}
+.app-nav button[aria-current=page],.case-original-nav button:last-child{color:#bfe7ff}
+@media(max-width:480px){.filter-bar button[data-filter=all]{--chip-rgb:196,214,236}}
+.app-nav button:last-child{background:#0f3e5f44}
+.app-nav button:last-child>i{background:#5fd0ff}
