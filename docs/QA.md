@@ -20,3 +20,8 @@ Responsive browser check: Tasks and Achievements at 320, 360, 390, 430, 768 and 
 Run local suite after mounting: window.caseTasks.destroy(); import('/tests/browser-tests.js').then(m => m.runTests()).then(console.table).
 
 Not tested: real CASE API, Telegram initData validation, account authorization, real wallet, reward ledger, withdrawals, or native Telegram iOS/Android WebViews. These are integration responsibilities, not implied passes. No production account/financial/reward operations were attempted.
+
+
+## Final visual polish (v5)
+
+All seven task cards and six achievements use original Telegram Gift thumbnails instead of large vector illustrations. Main card corners are 10px; buttons 6px. Task definitions, reward values and progress are unchanged. Filters checked: Daily 4, Limited 1, Social 2, All 7. Both tabs retain the shared gift rail. Responsive overflow rechecked at 320, 390, 430, 1440px.
