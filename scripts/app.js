@@ -1,0 +1,265 @@
+import { icon } from './icons.js';
+import { collectible } from './art.js';
+import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js';
+
+const ASSET = new URL('../assets/reward-gift-v2.png', import.meta.url).href;
+const GOLD = new URL('../assets/golden-cat.png', import.meta.url).href;
+const BUNNY = new URL('../assets/crystal-bunny.png', import.meta.url).href;
+const FAVICON = new URL('../assets/favicon-v2.svg', import.meta.url).href;
+const LABELS = {
+  available:'Ready to start', in_progress:'In progress', verifying:'Verifying your task',
+  verified:'Verified · reward ready', rejected:'Not verified yet', claimed:'Reward received',
+  already_claimed:'Already claimed', expired:'Task ended', retry_available:'You can try again',
+  server_error:'Result not confirmed', claiming:'Claiming your reward'
+};
+const ROUTES = {home:'Home',inventory:'Inventory',invite:'Invite',leaderboard:'Leaderboard',rewards:'Rewards',deposit:'Top up',cases:'Cases',crash:'Crash',channel:'CASE channel',collection:'Collection'};
+
+export function mountCaseTasks(root, options = {}) {
+  const app = new RewardsApp(root, options);
+  app.start();
+  return { destroy:() => app.destroy(), refresh:() => app.load(), setHost:host => app.setHost(host) };
+}
+
+class RewardsApp {
+  constructor(root, {host, review = false, embedded = false}) {
+    this.root = root; this.host = host; this.review = review; this.embedded = embedded;
+    this.data = null; this.tab = 'tasks'; this.filter = 'all'; this.overrides = new Map();
+    this.busy = new Set(); this.keys = new ClaimKeys(); this.life = new AbortController();
+    this.destroyed = false; this.loading = false; this.pendingLoad = null; this.lastLoad = 0;
+    this.anchor = performance.now(); this.serverNow = Date.now(); this.focusBefore = null; this.activeTask = null;
+    this.generation = 0; this.requests = new Set();
+  }
+  now() { return this.serverNow + performance.now() - this.anchor; }
+  items() { return this.data ? [...this.data.tasks, ...this.data.achievements] : []; }
+  item(id) {
+    const t = this.items().find(item => item.id === id);
+    if (!t) return null;
+    const uncertain = this.keys.pending(id) && !COMPLETE.has(t.state) ? 'server_error' : null;
+    return {...t, state:this.overrides.get(id) || uncertain || t.state};
+  }
+  async call(method, argument = {}) {
+    const host = validateHost(this.host), controller = new AbortController();
+    this.requests.add(controller);
+    const abort = () => controller.abort();
+    this.life.signal.addEventListener('abort', abort, {once:true});
+    let timer;
+    try {
+      return await Promise.race([
+        Promise.resolve().then(() => host[method]({...argument, signal:controller.signal})),
+        new Promise((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error('Request timeout')); }, 15000); }),
+        new Promise((_, reject) => controller.signal.addEventListener('abort', () => reject(new DOMException('Aborted','AbortError')), {once:true}))
+      ]);
+    } finally { clearTimeout(timer); this.requests.delete(controller); this.life.signal.removeEventListener('abort', abort); }
+  }
+  start() {
+    this.root.innerHTML = `<div class="case-app ${this.embedded?'is-embedded':''}">
+      <header class="app-header"><a class="brand" href="#tasks-content" aria-label="CASE Rewards"><img src="${FAVICON}" width="38" height="38" alt=""><span>CASE<span class="brand-dot">.</span><small>THE REWARDS CLUB</small></span></a><button class="icon-btn" data-action="help" aria-label="How rewards work">${icon('info')}</button></header>
+      <div class="balance-bar"><button class="balance-control" data-action="balance"><span class="token-token">${icon('star')}</span><span><small>Your balance</small><strong id="balance-value">— <span>POINTS</span></strong></span></button><button class="topup-btn" data-route="deposit">${icon('gift')}<span>Top up</span></button></div>
+      <main id="tasks-content">
+        <h1 class="sr-only">Your rewards</h1>
+        <div class="main-tabs" role="tablist" aria-label="Rewards sections"><button id="tab-tasks" role="tab" aria-selected="true" aria-controls="rewards-panel" data-tab="tasks">${icon('check-circle')}Tasks<span class="tab-count" id="task-count">—</span></button><button id="tab-achievements" role="tab" aria-selected="false" tabindex="-1" aria-controls="rewards-panel" data-tab="achievements">${icon('star')}Achievements</button></div>
+        <div id="rewards-panel" role="tabpanel" aria-labelledby="tab-tasks">
+          <section class="hero" id="hero"><div class="hero-copy"><span class="hero-badge"><i></i>YOUR NEXT GOOD THING</span><h2>Small tasks.<br><span>BIG ENERGY.</span></h2><p>Discover. Complete. Collect.<br>Make your next move a good one.</p><button class="hero-cta" data-action="explore">Explore tasks ${icon('arrow')}</button></div><div class="hero-orbit" aria-hidden="true"></div><img class="hero-art" src="${GOLD}" width="1254" height="1254" alt="" fetchpriority="high"><span class="hero-spark spark-one" aria-hidden="true">✦</span><span class="hero-spark spark-two" aria-hidden="true">✧</span><span class="hero-edition">GOOD VIBES. GREAT FINDS.</span></section>
+          <div id="live-content" aria-busy="true"><div class="loading-card"></div><div class="loading-card"></div></div>
+        </div>
+        <footer class="content-footer">${icon('shield')}<p>Every reward has a story.<br><strong>Yours starts with a task.</strong></p></footer>
+      </main>
+      <nav class="app-nav" aria-label="Main navigation">${[['inventory','case','Inventory'],['invite','users','Invite'],['home','grid','Home'],['leaderboard','star','Ranking'],['rewards','gift','Rewards']].map(([route,art,label])=>`<button data-route="${route}" ${route==='rewards'?'aria-current="page"':''}>${icon(art==='case'?'gift':art)}<span>${label}</span>${route==='rewards'?'<i></i>':''}</button>`).join('')}</nav>
+      <dialog class="sheet" aria-labelledby="sheet-title"><div class="sheet-grip"></div><button class="icon-btn close-sheet" data-action="close" aria-label="Close">${icon('close')}</button><div class="sheet-content"></div></dialog><div class="toast" role="status" aria-live="polite"></div>
+    </div>`;
+    this.shell = this.root.querySelector('.case-app'); this.dialog = this.root.querySelector('dialog');
+    this.content = this.root.querySelector('#live-content');
+    this.root.addEventListener('click', event => this.click(event), {signal:this.life.signal});
+    this.root.addEventListener('keydown', event => this.keydown(event), {signal:this.life.signal});
+    this.dialog.addEventListener('close', () => {this.activeTask=null; if(this.focusBefore?.isConnected)this.focusBefore.focus({preventScroll:true});}, {signal:this.life.signal});
+    this.dialog.addEventListener('click', event => {if(event.target===this.dialog){const r=this.dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)this.dialog.close();}}, {signal:this.life.signal});
+    document.addEventListener('visibilitychange', () => {if(!document.hidden&&this.data&&Date.now()-this.lastLoad>15000)this.load();}, {signal:this.life.signal});
+    window.addEventListener('online', () => this.load(), {signal:this.life.signal});
+    this.timer = setInterval(() => this.updateClocks(), 1000);
+    this.attachSubscription(); this.load();
+  }
+  attachSubscription() {
+    this.unsubscribe?.();
+    if(typeof this.host?.subscribe==='function') {
+      this.unsubscribe=this.host.subscribe(() => {clearTimeout(this.refreshTimer);this.refreshTimer=setTimeout(()=>this.load(),300);});
+    }
+  }
+  setHost(host) {
+    this.generation++;
+    for(const request of this.requests)request.abort();
+    this.pendingLoad=null;this.host=host;this.attachSubscription();this.data=null;
+    this.busy.clear();this.overrides.clear();this.activeTask=null;this.dialog.close();
+    this.root.querySelector('#balance-value').textContent='—';
+    this.root.querySelector('#task-count').textContent='—';
+    this.content.innerHTML='<div class="loading-card"></div><div class="loading-card"></div>';
+    return this.load();
+  }
+  commit(raw) {
+    const value=validateSnapshot(raw);
+    if(this.data&&value.revision<this.data.revision)return false;
+    this.data=value;this.serverNow=Date.parse(value.serverNow);this.anchor=performance.now();
+    for(const item of this.items())if(COMPLETE.has(item.state))this.keys.settled(item.id);
+    return true;
+  }
+  async load() {
+    if(this.destroyed)return;
+    if(this.pendingLoad)return this.pendingLoad;
+    const generation=this.generation;
+    this.loading=true;this.content.setAttribute('aria-busy','true');
+    this.pendingLoad=(async()=>{
+      try {
+        const value=await this.call('getSnapshot');if(this.destroyed||generation!==this.generation)return;
+        this.commit(value);this.lastLoad=Date.now();this.connectionError=false;this.render();
+      } catch(error) {
+        if(this.destroyed||generation!==this.generation)return;
+        this.connectionError=true;
+        if(this.data){this.render();this.toast('Couldn’t refresh. Your last confirmed progress is shown.');}
+        else this.content.innerHTML=`<section class="state-panel">${icon('shield')}<h2>${navigator.onLine?'Your rewards are waiting':'You’re offline'}</h2><p>${!this.host?'Open this page inside CASE to see your tasks and rewards.':'We couldn’t load your rewards. Please try again.'}</p><button class="secondary-btn" data-action="refresh">${icon('refresh')}Try again</button></section>`;
+      } finally {if(generation===this.generation){this.loading=false;this.pendingLoad=null;this.content.setAttribute('aria-busy','false');}}
+    })();
+    return this.pendingLoad;
+  }
+  render() {
+    if(!this.data||this.destroyed)return;
+    const focused=this.root.contains(document.activeElement)?document.activeElement:null;
+    const focusId=focused?.dataset.taskAction;const focusAction=focused?.dataset.action;
+    this.root.querySelector('#balance-value').innerHTML=`${rewardText(this.data.balance)} <span>${esc(this.data.balance?.unit||'POINTS')}</span>`;
+    this.root.querySelector('#task-count').textContent=this.data.tasks.filter(t=>!COMPLETE.has(t.state)&&t.state!=='expired').length;
+    this.content.innerHTML=this.tab==='tasks'?this.tasksView():this.achievementsView();
+    this.content.setAttribute('aria-busy','false');this.updateClocks();
+    if(focusId)this.root.querySelector(`[data-task-action="${CSS.escape(focusId)}"]`)?.focus({preventScroll:true});
+    else if(focusAction==='filter')this.root.querySelector(`[data-filter="${this.filter}"]`)?.focus({preventScroll:true});
+    if(this.activeTask&&this.dialog.open)this.taskSheet(this.activeTask,true);
+  }
+  tasksView() {
+    const ready=this.data.tasks.filter(t=>t.state==='verified'&&t.canClaim).length;
+    const daily=this.data.tasks.filter(t=>t.category==='daily');
+    const completed=daily.filter(t=>COMPLETE.has(t.state)).length;
+    return `${this.connectionError?'<div class="sync-warning" role="status">Showing your last confirmed progress. <button data-action="refresh">Refresh</button></div>':''}
+      <div class="journey"><span class="journey-icon">${icon('bolt')}</span><div><strong>Your daily journey</strong><small>${completed} of ${daily.length} rewards collected</small></div><div class="journey-dots" aria-label="${completed} of ${daily.length} daily tasks claimed">${daily.slice(0,12).map(t=>`<span class="${COMPLETE.has(t.state)?'done':''}">${COMPLETE.has(t.state)?icon('check'):''}</span>`).join('')}</div></div>
+      <div class="filter-bar" role="group" aria-label="Filter tasks">${[['all','All tasks'],['daily','Daily'],['limited','Limited'],['social','Social']].map(([id,label])=>`<button data-action="filter" data-filter="${id}" aria-pressed="${this.filter===id}">${label}${id==='all'&&ready?`<span>${ready}</span>`:''}</button>`).join('')}</div>
+      <div id="task-groups">${['daily','limited','social'].filter(c=>this.filter==='all'||this.filter===c).map(c=>this.group(c)).join('')||this.empty('No tasks here yet','New things to do will appear here.')}</div>
+      <section class="crew-section" aria-label="CASE original artwork"><div class="crew-heading"><span>THE REWARDS CREW</span><h2>A little out of this world.</h2><p>Meet the characters bringing your tasks to life.</p></div><div class="crew-grid"><div class="crew-card crew-gold"><span>01 / GOLDEN</span><img src="${GOLD}" alt="Golden space cat with a pink jacket" width="180" height="200" loading="lazy"><strong>Stay golden.</strong></div><div class="crew-card crew-blue"><span>02 / CRYSTAL</span><img src="${BUNNY}" alt="Turquoise crystal bunny with orange sneakers" width="180" height="200" loading="lazy"><strong>Keep it cool.</strong></div></div></section>
+      <button class="discovery-banner" data-action="achievements"><span class="discovery-art"><img src="${BUNNY}" width="90" height="95" alt="" loading="lazy"></span><span><small>GO A LITTLE FURTHER</small><strong>Some things are worth unlocking.</strong><span>Discover your achievements ${icon('arrow')}</span></span></button>`;
+  }
+  group(category) {
+    const tasks=this.data.tasks.filter(t=>t.category===category);
+    if(!tasks.length)return this.filter===category?this.empty('Nothing here just yet','Check back for new tasks.'):'';
+    const meta={daily:['Daily tasks','sun','Fresh goals, every day.'],limited:['Limited editions','star','A little something out of the ordinary.'],social:['Stay connected','users','Good company comes with good things.']}[category];
+    const deadlines=tasks.filter(t=>t.expiresAt&&!COMPLETE.has(t.state)&&t.state!=='expired').map(t=>t.expiresAt).sort();
+    return `<section class="task-group" aria-label="${meta[0]}"><div class="group-heading"><div><h2>${icon(meta[1])}${meta[0]}</h2><p>${meta[2]}</p></div>${deadlines.length?`<span class="time-pill">${icon('clock')}<span data-deadline="${esc(deadlines[0])}">${remaining(deadlines[0],this.now())}</span></span>`:''}</div><div class="task-list">${tasks.map(t=>this.taskCard(this.item(t.id))).join('')}</div></section>`;
+  }
+  taskCard(t) {
+    const action=taskAction(t,this.now()),percent=Math.min(100,t.progress/t.target*100);
+    const ready=t.state==='verified'&&t.canClaim;
+    return `<article class="task-card color-${esc(t.icon)} ${ready?'ready':''} ${COMPLETE.has(t.state)?'is-complete':''} ${t.category==='limited'?'limited-card':''}" data-card="${esc(t.id)}">
+      <button class="task-art" data-details="${esc(t.id)}" aria-label="Details: ${esc(t.title)}">${t.icon==='gift'?`<img src="${ASSET}" alt="" width="76" height="76" loading="lazy">`:collectible(t.icon)}</button>
+      <div class="task-info">${t.featured?'<span class="featured-tag">SPECIAL DROP</span>':''}<h3><button data-details="${esc(t.id)}">${esc(t.title)}</button></h3><p>${esc(t.description)}</p><span class="reward-pill">${icon('star')}+${rewardText(t.reward)}<small>${esc(t.reward.unit)}</small></span></div>
+      <div class="task-action"><button class="${ready?'claim-btn':'task-btn'}" data-task-action="${esc(t.id)}" ${action.disabled?'disabled':''}>${icon(ready?'gift':action.kind==='navigate'?'arrow':action.disabled?'check':action.kind==='refresh'?'refresh':'check-circle')}<span>${action.label}</span></button></div>
+      <div class="task-progress"><span class="status-label ${ready?'status-ready':''} ${t.state==='server_error'||t.state==='rejected'?'status-error':''}">${['available','in_progress'].includes(t.state)?`Progress <strong>${t.progress}/${t.target}</strong>`:LABELS[t.state]}</span><div class="progress-track" role="progressbar" aria-label="${esc(t.title)}" aria-valuemin="0" aria-valuemax="${t.target}" aria-valuenow="${Math.min(t.progress,t.target)}"><span style="width:${percent}%"></span></div></div>
+    </article>`;
+  }
+  achievementsView() {
+    const list=this.data.achievements,earned=list.filter(t=>COMPLETE.has(t.state)||t.state==='verified').length;
+    return `${this.connectionError?'<div class="sync-warning">Showing last confirmed progress. <button data-action="refresh">Refresh</button></div>':''}<div class="achievement-intro"><span><img src="${BUNNY}" width="105" height="118" alt=""></span><div><p class="overline">YOUR PERSONAL HALL OF FAME</p><h2>More than a reward.<br>A milestone.</h2><p>${earned} of ${list.length} achievements unlocked</p></div></div><div class="achievement-grid">${list.map(raw=>{const t=this.item(raw.id),a=taskAction(t,this.now()),done=COMPLETE.has(t.state);return `<article class="achievement-card color-${esc(t.icon)} ${done?'unlocked':''}"><span class="achievement-status">${done?icon('check')+'Unlocked':'IN PROGRESS'}</span><button class="achievement-art" data-details="${esc(t.id)}" aria-label="Details: ${esc(t.title)}">${collectible(t.icon)}</button><h3>${esc(t.title)}</h3><p>${esc(t.description)}</p><div class="achievement-progress"><span>${t.progress} / ${t.target}</span><div class="progress-track"><span style="width:${Math.min(100,t.progress/t.target*100)}%"></span></div></div><span class="reward-pill">${icon('star')}+${rewardText(t.reward)}<small>${esc(t.reward.unit)}</small></span><button class="achievement-button" ${a.disabled?'disabled':''} data-task-action="${esc(t.id)}">${a.kind==='none'?a.label:a.kind==='claim'?'Claim reward':'View achievement'}${icon(a.kind==='none'?'check':'arrow')}</button></article>`;}).join('')||this.empty('Your story starts here','New achievements will appear as they become available.')}</div>`;
+  }
+  empty(title,description) {return `<div class="state-panel">${icon('star')}<h2>${title}</h2><p>${description}</p></div>`;}
+  updateClocks() {
+    if(this.destroyed||!this.data)return;
+    this.root.querySelectorAll('[data-deadline]').forEach(el=>el.textContent=remaining(el.dataset.deadline,this.now()));
+    this.root.querySelectorAll('[data-task-action]').forEach(btn=>{
+      const t=this.item(btn.dataset.taskAction);if(!t)return;
+      const a=taskAction(t,this.now());btn.disabled=!!a.disabled||this.busy.has(t.id);btn.title=a.label;
+      const label=btn.querySelector('span');if(label)label.textContent=a.label;
+    });
+    if(this.activeTask&&this.dialog.open) {
+      const t=this.item(this.activeTask),btn=this.dialog.querySelector('[data-sheet-action]');
+      if(t&&btn)btn.disabled=!!taskAction(t,this.now()).disabled||this.review||this.busy.has(t.id);
+    }
+  }
+  showSheet(html) {
+    const wasOpen=this.dialog.open;
+    this.dialog.querySelector('.sheet-content').innerHTML=html;
+    if(!wasOpen){this.focusBefore=document.activeElement;this.dialog.showModal();}
+  }
+  taskSheet(id,update=false) {
+    const t=this.item(id);if(!t)return;
+    const a=taskAction(t,this.now());this.activeTask=id;
+    const focused=update&&this.dialog.contains(document.activeElement);
+    this.showSheet(`<div class="detail-art">${collectible(t.icon)}</div><span class="detail-eyebrow">${COMPLETE.has(t.state)?'MILESTONE COMPLETE':t.category==='limited'?'LIMITED EDITION':'YOUR NEXT STEP'}</span><h2 id="sheet-title">${esc(t.title)}</h2><p>${esc(t.description)}</p><div class="detail-reward"><span>Reward</span><strong>${icon('star')}+${rewardText(t.reward)} <small>${esc(t.reward.unit)}</small></strong></div><div class="detail-progress"><span>${esc(LABELS[t.state])}</span><strong>${t.progress} / ${t.target}</strong></div><div class="progress-track"><span style="width:${Math.min(100,t.progress/t.target*100)}%"></span></div>${t.expiresAt?`<p class="detail-expiry">${icon('clock')}Time left: <span data-deadline="${esc(t.expiresAt)}">${remaining(t.expiresAt,this.now())}</span></p>`:''}${t.state==='server_error'?'<p class="inline-message" role="status">The result is not confirmed. Check the status before trying again. Your balance will update only after confirmation.</p>':''}${t.state==='rejected'?'<p class="inline-message">The requirements haven’t been confirmed yet. Complete the task before checking again.</p>':''}${t.retryAt?`<p class="inline-message">Next check: <span data-deadline="${esc(t.retryAt)}">${remaining(t.retryAt,this.now())}</span></p>`:''}<button class="primary-btn full-width" data-sheet-action="${esc(t.id)}" ${a.disabled||this.review?'disabled':''}>${this.review&&!a.disabled?'Available inside CASE':a.label}${icon(a.kind==='navigate'?'arrow':a.kind==='claim'?'gift':'check-circle')}</button>${this.review?'<p class="quiet-note">Design review · sample task. No live action is performed.</p>':'<p class="quiet-note">Completion and rewards are confirmed by CASE.</p>'}`);
+    if(focused)this.dialog.querySelector('[data-sheet-action]:not(:disabled)')?.focus({preventScroll:true});
+  }
+  async perform(id) {
+    const t=this.item(id);if(!t||this.busy.has(id))return;
+    if(this.review){this.taskSheet(id);return;}
+    const a=taskAction(t,this.now());if(a.disabled)return;
+    if(a.kind==='details'){this.taskSheet(id);return;}
+    if(a.kind==='navigate'){await this.navigate(t.route);return;}
+    this.busy.add(id);
+    const generation=this.generation;
+    const isClaim=a.kind==='claim',isRefresh=a.kind==='refresh',pending=this.keys.pending(id);
+    this.overrides.set(id,isClaim?'claiming':'verifying');this.render();
+    try {
+      let raw;
+      if(isClaim){const idempotencyKey=this.keys.get(id);this.keys.begin(id);raw=await this.call('claimReward',{taskId:id,idempotencyKey});}
+      else if(isRefresh&&pending)raw=await this.call('getOperation',{taskId:id,idempotencyKey:this.keys.get(id)});
+      else if(isRefresh)raw=await this.call('getSnapshot');
+      else raw=await this.call('verifyTask',{taskId:id});
+      if(this.destroyed||generation!==this.generation)return;
+      if(isClaim||(isRefresh&&pending)) {
+        const result=validateOperation(raw,id);
+        this.commit(result.snapshot);
+        if(result.status==='pending') {
+          this.overrides.set(id,'server_error');this.render();
+          this.toast('Your claim is still processing. Check its status in a moment.');return;
+        }
+        this.keys.settled(id);
+        if(result.status==='failed')this.keys.rotate(id);
+      } else this.commit(raw);
+      this.overrides.delete(id);this.render();
+      const result=this.item(id);
+      if(result&&COMPLETE.has(result.state)){this.toast('Reward confirmed. Your balance is up to date.');}
+      else if(result?.state==='verified')this.toast('Task verified. Your reward is ready.');
+      else this.toast('Task status updated.');
+    } catch(error) {
+      if(this.destroyed||generation!==this.generation)return;
+      this.overrides.set(id,'server_error');this.render();this.toast('Couldn’t confirm the result. Please check its status.');
+    } finally {if(generation===this.generation){this.busy.delete(id);this.updateClocks();}}
+  }
+  async navigate(route) {
+    if(route==='rewards'){this.selectTab('tasks');this.root.querySelector('main').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});return;}
+    if(this.review){this.activeTask=null;this.showSheet(`<div class="detail-art">${collectible(route==='collection'?'gem':'rocket')}</div><h2 id="sheet-title">${esc(ROUTES[route]||'Explore CASE')}</h2><p>This opens the ${esc(ROUTES[route]||'selected')} section inside CASE. The design review stays on this page.</p><button class="primary-btn full-width" data-action="close">Back to rewards ${icon('arrow')}</button>`);return;}
+    try { await this.call('navigate',{route}); } catch {this.toast('This section is unavailable. Please open it inside CASE.');}
+  }
+  selectTab(tab) {
+    this.tab=tab==='achievements'?'achievements':'tasks';
+    this.root.querySelectorAll('[data-tab]').forEach(b=>{const selected=b.dataset.tab===this.tab;b.setAttribute('aria-selected',selected);b.tabIndex=selected?0:-1;});
+    this.root.querySelector('#rewards-panel').setAttribute('aria-labelledby',`tab-${this.tab}`);
+    this.root.querySelector('#hero').hidden=this.tab!=='tasks';
+    if(this.data)this.render();
+  }
+  keydown(event) {
+    if(!event.target.matches('[role="tab"]')||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    event.preventDefault();const next=event.key==='Home'?'tasks':event.key==='End'?'achievements':this.tab==='tasks'?'achievements':'tasks';
+    this.selectTab(next);this.root.querySelector(`[data-tab="${next}"]`).focus();
+  }
+  click(event) {
+    const button=event.target.closest('button');if(!button||button.disabled)return;
+    if(button.dataset.tab){this.selectTab(button.dataset.tab);return;}
+    if(button.dataset.route){this.navigate(button.dataset.route);return;}
+    if(button.dataset.details){this.taskSheet(button.dataset.details);return;}
+    if(button.dataset.taskAction){this.perform(button.dataset.taskAction);return;}
+    if(button.dataset.sheetAction){this.perform(button.dataset.sheetAction);return;}
+    switch(button.dataset.action){
+      case 'close':this.dialog.close();break;
+      case 'refresh':this.load();break;
+      case 'filter':this.filter=button.dataset.filter;this.render();break;
+      case 'explore':this.root.querySelector('.filter-bar, .state-panel')?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});break;
+      case 'achievements':this.selectTab('achievements');this.root.querySelector('.main-tabs').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});this.root.querySelector('#tab-achievements').focus({preventScroll:true});break;
+      case 'balance':this.activeTask=null;this.showSheet(`<div class="detail-art">${collectible('gem')}</div><span class="detail-eyebrow">YOUR REWARDS</span><h2 id="sheet-title">${rewardText(this.data?.balance)} <small>${esc(this.data?.balance?.unit||'POINTS')}</small></h2><p>${this.data?'Your latest balance from CASE. Rewards appear here after a successful claim.':'Connect through CASE to see your current balance.'}</p>${this.review?'<p class="inline-message">Sample balance for design review. No real account is connected.</p>':''}<button class="primary-btn full-width" data-action="close">Keep exploring ${icon('arrow')}</button>`);break;
+      case 'help':this.activeTask=null;this.showSheet(`<div class="detail-art">${collectible('gift')}</div><h2 id="sheet-title">A few steps.<br>Something extra.</h2><ol class="help-steps"><li><span>01</span><div><strong>Find your next task</strong><p>Explore daily challenges, special editions and community tasks.</p></div></li><li><span>02</span><div><strong>Make progress</strong><p>Follow the task’s requirements. CASE confirms your progress.</p></div></li><li><span>03</span><div><strong>Claim your reward</strong><p>Once verified, collect your reward and watch your balance update.</p></div></li></ol><button class="primary-btn full-width" data-action="close">Let’s go ${icon('arrow')}</button>`);break;
+    }
+  }
+  toast(message) {if(this.destroyed)return;const el=this.root.querySelector('.toast');el.textContent=message;el.classList.add('visible');clearTimeout(this.toastTimer);this.toastTimer=setTimeout(()=>el.classList.remove('visible'),4000);}
+  destroy() {this.destroyed=true;this.life.abort();clearInterval(this.timer);clearTimeout(this.toastTimer);clearTimeout(this.refreshTimer);this.unsubscribe?.();this.dialog?.close();this.root.replaceChildren();}
+}

@@ -1,0 +1,25 @@
+const paths = {
+    arrow:'<path d="M5 12h14m-5-5 5 5-5 5"/>',
+    chevron:'<path d="m9 5 7 7-7 7"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.2"/>',
+    close:'<path d="m6 6 12 12M6 18 18 6"/>',
+    check:'<path d="m5 12 4 4L19 6"/>',
+    'check-circle':'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    shield:'<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/>',
+    bolt:'<path d="m13 2-9 12h7l-1 8 10-13h-7l1-7Z"/>',
+    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/><circle cx="9" cy="7" r="4"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v2"/>',
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>',
+    send:'<path d="m21 3-7 18-4-7-7-4 18-7Z"/><path d="m10 14 6-6"/>',
+    gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v9h14v-9M12 8v13"/><path d="M12 8H8a3 3 0 1 1 3-3l1 3Zm0 0h4a3 3 0 1 0-3-3l-1 3Z"/>',
+    grid:'<rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/>',
+    rocket:'<path d="M14 5c4-3 7-2 7-2s1 3-2 7l-8 8-5-5 8-8Z"/><circle cx="16" cy="8" r="1.5"/><path d="m8 11-5 1 2-5 7-1m1 10-1 5 5-2 1-7M6 17l-3 4 4-3"/>',
+    craft:'<path d="m14 4 5 5-4 4-5-5 4-4Zm-2 6L3 19l2 2 9-9M13 3l8 8M3 5l2 2m0-4L3 5m14 12 4 4m0-4-4 4"/>',
+    menu:'<path d="M4 6h16M4 12h16M4 18h10"/>',
+    wheel:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/><path d="M12 2v8m0 4v8M2 12h8m4 0h8M5 5l5.5 5.5m3 3L19 19M5 19l5.5-5.5m3-3L19 5M8 3l3 7m2 4 3 7M3 8l7 3m4 2 7 3M3 16l7-3m4-2 7-3M8 21l3-7m2-4 3-7"/>',
+    settings:'<path d="M4 7h16M4 17h16"/><circle cx="8" cy="7" r="3" fill="currentColor" stroke="none"/><circle cx="16" cy="17" r="3" fill="currentColor" stroke="none"/>',
+    refresh:'<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 6a8 8 0 0 1 13 3M5 15a8 8 0 0 0 13 3"/>',
+    star:'<path d="m12 2 3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-7Z"/>'
+  };
+export function icon(name, cls = "") { return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.star}</svg>`; }
