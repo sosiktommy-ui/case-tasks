@@ -1,17 +1,18 @@
-import { gifts, giftImage } from './gifts.js?v=8';
-import { icon } from './icons.js?v=8';
-import { icon3d } from './icons3d.js?v=8';
-import { collectible } from './art.js?v=8';
-import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=8';
+import { gifts, giftImage } from './gifts.js?v=12';
+import { icon } from './icons.js?v=12';
+import { icon3d } from './icons3d.js?v=12';
+import {nftArt} from './nft-art.js?v=12';
+import { PALETTES, readPalette, savePalette, tonesFor } from './themes.js?v=12';
+import { collectible } from './art.js?v=12';
+import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=12';
 
 const ASSET = new URL('../assets/reward-gift-v2.png', import.meta.url).href;
 const GOLD = new URL('../assets/collectible-trio.png', import.meta.url).href;
 const BUNNY = giftImage('heart-locket');
-const TASK_GIFTS = {rocket:'light-sword',gamepad:'astral-shard',users:'plush-pepe',case:'loot-bag',gift:'heart-locket',send:'durovs-cap',star:'swiss-watch',crown:'heart-locket',trophy:'swiss-watch',bolt:'love-potion',gem:'astral-shard'};
-const taskGift = kind => `<img src="${giftImage(TASK_GIFTS[kind] || 'loot-bag')}" alt="" width="80" height="80" loading="lazy">`;
+const taskGift = kind => nftArt(kind);
 const FAVICON = new URL('../assets/favicon-v2.svg', import.meta.url).href;
 const BOLT3D = new URL('../assets/bolt-3d.webp', import.meta.url).href;
-const boltArt = () => `<img class="art3d" src="${BOLT3D}" width="110" height="110" alt="" decoding="async">`;
+const boltArt = () => icon3d('bolt','art3d');
 const LABELS = {
   available:'Ready to start', in_progress:'In progress', verifying:'Verifying your task',
   verified:'Verified · reward ready', rejected:'Not verified yet', claimed:'Reward received',
@@ -33,7 +34,7 @@ class RewardsApp {
     this.busy = new Set(); this.keys = new ClaimKeys(); this.life = new AbortController();
     this.destroyed = false; this.loading = false; this.pendingLoad = null; this.lastLoad = 0;
     this.anchor = performance.now(); this.serverNow = Date.now(); this.focusBefore = null; this.activeTask = null;
-    this.generation = 0; this.requests = new Set();
+    this.generation = 0; this.requests = new Set(); this.palette = readPalette(); this.tones = tonesFor(this.palette);
   }
   now() { return this.serverNow + performance.now() - this.anchor; }
   items() { return this.data ? [...this.data.tasks, ...this.data.achievements] : []; }
@@ -70,8 +71,8 @@ class RewardsApp {
     return `<section class="public-missions" aria-label="Your tasks"><div class="group-heading"><div><h2><span class="heading-mark mark-art">${boltArt()}</span>Your next challenge</h2><p>Your progress. Your rewards. All in CASE.</p></div><span class="account-pill">${icon('user')}Sign in</span></div><div class="public-task-list">${[['loot-bag','Daily challenges','Find your daily goals and keep your progress going.','violet'],['plush-pepe','Community missions','Stay connected. Discover what’s new in CASE.','green'],['heart-locket','Special collections','Explore limited missions and collectible moments.','pink']].map(([file,title,copy,tone])=>`<a class="public-task public-${tone}" href="https://t.me/case_official_ru_bot" target="_blank" rel="noopener noreferrer"><span class="public-task-art"><img src="${giftImage(file)}" width="86" height="86" alt=""></span><span class="public-task-copy"><strong>${title}</strong><span>${copy}</span><small>OPEN IN CASE ${icon('arrow')}</small></span></a>`).join('')}</div><p class="connection-note">Open CASE to load your personal tasks, progress and available rewards.</p></section>${this.giftGallery()}<button class="discovery-banner" data-action="achievements"><span class="discovery-art"><img src="${giftImage('swiss-watch')}" width="90" height="95" alt="" loading="lazy"></span><span><small>YOUR NEXT MILESTONE</small><strong>Make it one to remember.</strong><span>Explore achievements ${icon('arrow')}</span></span></button>`;
   }
   start() {
-    this.root.innerHTML = `<div class="case-app ${this.embedded?'is-embedded':''}">
-      <header class="app-header"><a class="brand" href="#tasks-content" aria-label="CASE Rewards"><span class="brand-mark">${icon3d('gem')}</span><span>CASE<span class="brand-dot">.</span><small>PLAY. COLLECT. REPEAT.</small></span></a><button class="icon-btn" data-action="help" aria-label="How rewards work">${icon('info')}</button></header>
+    this.root.innerHTML = `<div class="case-app ${this.embedded?'is-embedded':''}" data-palette="${this.palette}">
+      <header class="app-header"><a class="brand" href="#tasks-content" aria-label="CASE Rewards"><span class="brand-mark">${icon3d('gem')}</span><span>CASE<span class="brand-dot">.</span><small>PLAY. COLLECT. REPEAT.</small></span></a><span class="header-actions"><button class="icon-btn" data-action="palette" aria-label="Colour theme">${icon('palette')}</button><button class="icon-btn" data-action="help" aria-label="How rewards work">${icon('info')}</button></span></header>
       <div class="balance-bar"><button class="balance-control" data-action="balance"><span class="token-token">${icon3d('ton')}</span><span><small>Your balance</small><strong id="balance-value">— <span>TON</span></strong></span></button><button class="topup-btn" data-route="wallet">${icon('wallet')}<span>Connect wallet</span></button></div>
       ${this.giftTicker()}
       <main id="tasks-content">
@@ -157,17 +158,16 @@ class RewardsApp {
     const completed=daily.filter(t=>COMPLETE.has(t.state)).length;
     return `${this.connectionError?'<div class="sync-warning" role="status">Showing your last confirmed progress. <button data-action="refresh">Refresh</button></div>':''}
       <div class="journey${completed&&completed===daily.length?' journey-full':''}"><span class="journey-icon">${boltArt()}</span><div class="journey-copy"><strong>Your daily journey</strong><small>${completed} of ${daily.length} rewards collected</small></div><div class="journey-meter"><div class="journey-dots" aria-label="${completed} of ${daily.length} daily tasks claimed">${daily.slice(0,12).map(t=>`<span class="${COMPLETE.has(t.state)?'done':''}">${COMPLETE.has(t.state)?icon('check'):''}</span>`).join('')}</div><span class="journey-pct">${daily.length?Math.round(completed/daily.length*100):0}%</span></div></div>
-      <div class="filter-bar" role="group" aria-label="Filter tasks">${[['all','All','grid','steel'],['daily','Daily','sun','azure'],['limited','Limited','crown','indigo'],['social','Social','users','teal']].map(([id,label,art,tone])=>{const open=this.data.tasks.filter(t=>(id==='all'||t.category===id)&&!COMPLETE.has(t.state)&&t.state!=='expired').length;return `<button data-action="filter" data-filter="${id}" aria-pressed="${this.filter===id}"><i class="chip-art">${icon3d(art,'',tone)}</i><span class="chip-label">${label}</span>${open?`<span class="chip-count">${open}</span>`:''}</button>`;}).join('')}</div>
+      <div class="filter-bar" role="group" aria-label="Filter tasks">${[['all','All','grid'],['daily','Daily','sun'],['limited','Limited','crown'],['social','Social','users']].map(([id,label,art])=>{const open=this.data.tasks.filter(t=>(id==='all'||t.category===id)&&!COMPLETE.has(t.state)&&t.state!=='expired').length;return `<button data-action="filter" data-filter="${id}" aria-pressed="${this.filter===id}"><i class="chip-art">${icon3d(art,'',this.tones[id])}</i><span class="chip-label">${label}</span>${open?`<span class="chip-count">${open}</span>`:''}</button>`;}).join('')}</div>
       <div id="task-groups">${['daily','limited','social'].filter(c=>this.filter==='all'||this.filter===c).map(c=>this.group(c)).join('')||this.empty('No tasks here yet','New things to do will appear here.')}</div>
-      ${this.giftGallery()}
-      <button class="discovery-banner" data-action="achievements"><span class="discovery-art"><img src="${BUNNY}" width="90" height="95" alt="" loading="lazy"></span><span><small>GO A LITTLE FURTHER</small><strong>Some things are worth unlocking.</strong><span>Discover your achievements ${icon('arrow')}</span></span></button>`;
+      <button class="discovery-banner" data-action="achievements"><span class="discovery-art">${nftArt('crown')}</span><span><small>GO A LITTLE FURTHER</small><strong>Some things are worth unlocking.</strong><span>Discover your achievements ${icon('arrow')}</span></span></button>`;
   }
   group(category) {
     const tasks=this.data.tasks.filter(t=>t.category===category);
     if(!tasks.length)return this.filter===category?this.empty('Nothing here just yet','Check back for new tasks.'):'';
-    const meta={daily:['Daily tasks','sun','Fresh goals, every day.','azure'],limited:['Limited editions','crown','A little something out of the ordinary.','indigo'],social:['Stay connected','users','Good company comes with good things.','teal']}[category];
+    const meta={daily:['Daily tasks','sun','Fresh goals, every day.'],limited:['Limited editions','crown','A little something out of the ordinary.'],social:['Stay connected','users','Good company comes with good things.']}[category];
     const deadlines=tasks.filter(t=>t.expiresAt&&!COMPLETE.has(t.state)&&t.state!=='expired').map(t=>t.expiresAt).sort();
-    return `<section class="task-group group-${category}" aria-label="${meta[0]}"><div class="group-heading"><div><h2><span class="heading-mark">${icon3d(meta[1],'',meta[3])}</span>${meta[0]}</h2><p>${meta[2]}</p></div>${deadlines.length?`<span class="time-pill">${icon('clock')}<span data-deadline="${esc(deadlines[0])}">${remaining(deadlines[0],this.now())}</span></span>`:''}</div><div class="task-list${tasks.length===1?' solo':''}">${tasks.map(t=>this.taskCard(this.item(t.id))).join('')}</div></section>`;
+    return `<section class="task-group group-${category}" aria-label="${meta[0]}"><div class="group-heading"><div><h2><span class="heading-mark">${icon3d(meta[1],'',this.tones[category])}</span>${meta[0]}</h2><p>${meta[2]}</p></div>${deadlines.length?`<span class="time-pill">${icon('clock')}<span data-deadline="${esc(deadlines[0])}">${remaining(deadlines[0],this.now())}</span></span>`:''}</div><div class="task-list${tasks.length===1?' solo':''}">${tasks.map(t=>this.taskCard(this.item(t.id))).join('')}</div></section>`;
   }
   taskCard(t) {
     const action=taskAction(t,this.now()),percent=Math.min(100,t.progress/t.target*100);
@@ -181,7 +181,7 @@ class RewardsApp {
   }
   achievementsView() {
     const list=this.data.achievements,earned=list.filter(t=>COMPLETE.has(t.state)||t.state==='verified').length;
-    return `${this.connectionError?'<div class="sync-warning">Showing last confirmed progress. <button data-action="refresh">Refresh</button></div>':''}<div class="achievement-intro"><span><img src="${BUNNY}" width="105" height="118" alt=""></span><div><p class="overline">YOUR PERSONAL HALL OF FAME</p><h2>More than a reward.<br>A milestone.</h2><p>${earned} of ${list.length} achievements unlocked</p></div></div><div class="achievement-grid">${list.map(raw=>{const t=this.item(raw.id),a=taskAction(t,this.now()),done=COMPLETE.has(t.state);return `<article class="achievement-card color-${esc(t.icon)} ${done?'unlocked':''}"><span class="achievement-status">${done?icon('check')+'Unlocked':'IN PROGRESS'}</span><button class="achievement-art" data-details="${esc(t.id)}" aria-label="Details: ${esc(t.title)}">${taskGift(t.icon)}</button><h3>${esc(t.title)}</h3><p>${esc(t.description)}</p><div class="achievement-progress"><span>${t.progress} / ${t.target}</span><div class="progress-track"><span style="width:${Math.min(100,t.progress/t.target*100)}%"></span></div></div><span class="reward-pill">${icon3d('ton')}+${rewardText(t.reward)}<small>${esc(t.reward.unit)}</small></span><button class="achievement-button" ${a.disabled?'disabled':''} data-task-action="${esc(t.id)}">${a.kind==='none'?a.label:a.kind==='claim'?'Claim reward':'View achievement'}${icon(a.kind==='none'?'check':'arrow')}</button></article>`;}).join('')||this.empty('Your story starts here','New achievements will appear as they become available.')}</div>`;
+    return `${this.connectionError?'<div class="sync-warning">Showing last confirmed progress. <button data-action="refresh">Refresh</button></div>':''}<div class="achievement-intro"><span>${nftArt('crown')}</span><div><p class="overline">YOUR PERSONAL HALL OF FAME</p><h2>More than a reward.<br>A milestone.</h2><p>${earned} of ${list.length} achievements unlocked</p></div></div><div class="achievement-grid">${list.map(raw=>{const t=this.item(raw.id),a=taskAction(t,this.now()),done=COMPLETE.has(t.state);return `<article class="achievement-card color-${esc(t.icon)} ${done?'unlocked':''}"><span class="achievement-status">${done?icon('check')+'Unlocked':'IN PROGRESS'}</span><button class="achievement-art" data-details="${esc(t.id)}" aria-label="Details: ${esc(t.title)}">${taskGift(t.icon)}</button><h3>${esc(t.title)}</h3><p>${esc(t.description)}</p><div class="achievement-progress"><span>${t.progress} / ${t.target}</span><div class="progress-track"><span style="width:${Math.min(100,t.progress/t.target*100)}%"></span></div></div><span class="reward-pill">${icon3d('ton')}+${rewardText(t.reward)}<small>${esc(t.reward.unit)}</small></span><button class="achievement-button" ${a.disabled?'disabled':''} data-task-action="${esc(t.id)}">${a.kind==='none'?a.label:a.kind==='claim'?'Claim reward':'View achievement'}${icon(a.kind==='none'?'check':'arrow')}</button></article>`;}).join('')||this.empty('Your story starts here','New achievements will appear as they become available.')}</div>`;
   }
   empty(title,description) {return `<div class="state-panel">${icon3d('ton')}<h2>${title}</h2><p>${description}</p></div>`;}
   updateClocks() {
@@ -199,23 +199,46 @@ class RewardsApp {
   }
   showSheet(html) {
     const wasOpen=this.dialog.open;
+    this.dialog.classList.toggle('mission-sheet', !!this.activeTask);
     this.dialog.querySelector('.sheet-content').innerHTML=html;
     if(!wasOpen){this.focusBefore=document.activeElement;this.dialog.showModal();}
+  }
+  paletteSheet() {
+    this.showSheet(`<span class="detail-eyebrow">YOUR STYLE</span><h2 id="sheet-title">Choose your atmosphere.</h2><div class="palette-grid">${PALETTES.map(p=>`<button class="palette-option${p.id===this.palette?' is-active':''}" data-palette-id="${esc(p.id)}" aria-pressed="${p.id===this.palette}"><span class="palette-swatch" aria-hidden="true">${p.swatch.map(c=>`<i data-swatch="${esc(c)}"></i>`).join('')}</span><span class="palette-copy"><strong>${esc(p.name)}</strong><small>${esc(p.note)}</small></span>${p.id===this.palette?icon('check'):''}</button>`).join('')}</div><p class="quiet-note">Your choice is remembered on this device only.</p>`);
+    this.paintSwatches();
+  }
+  paintSwatches() {
+    this.dialog.querySelectorAll('[data-swatch]').forEach(el=>{el.style.background=el.dataset.swatch;});
+  }
+  setPalette(id) {
+    this.palette=savePalette(id);this.tones=tonesFor(this.palette);
+    this.shell.dataset.palette=this.palette;
+    if(this.data)this.render();else this.content.innerHTML=this.publicView(!!this.host);
+    this.paletteSheet();
+    this.dialog.querySelector(`[data-palette-id="${CSS.escape(this.palette)}"]`)?.focus({preventScroll:true});
   }
   taskSheet(id,update=false) {
     const t=this.item(id);if(!t)return;
     const a=taskAction(t,this.now());this.activeTask=id;
     const focused=update&&this.dialog.contains(document.activeElement);
     const rarity=COMPLETE.has(t.state)?'done':t.category==='limited'?'limited':t.category==='social'?'social':'daily';
-    this.showSheet(`<div class="sheet-hero hero-${rarity}"><span class="sheet-halo" aria-hidden="true"></span><span class="sheet-beam" aria-hidden="true"></span><div class="detail-art">${taskGift(t.icon)}</div><span class="sheet-plinth" aria-hidden="true"></span></div><span class="detail-eyebrow">${COMPLETE.has(t.state)?'MILESTONE COMPLETE':t.category==='limited'?'LIMITED EDITION':t.category==='social'?'COMMUNITY':'YOUR NEXT STEP'}</span><h2 id="sheet-title">${esc(t.title)}</h2><p>${esc(t.description)}</p><div class="detail-reward"><span>Reward</span><strong>${icon3d('ton')}+${rewardText(t.reward)} <small>${esc(t.reward.unit)}</small></strong></div><div class="detail-progress"><span>${esc(LABELS[t.state])}</span><strong>${t.progress} / ${t.target}</strong></div><div class="progress-track"><span style="width:${Math.min(100,t.progress/t.target*100)}%"></span></div>${t.expiresAt?`<p class="detail-expiry">${icon('clock')}Time left: <span data-deadline="${esc(t.expiresAt)}">${remaining(t.expiresAt,this.now())}</span></p>`:''}${t.state==='server_error'?'<p class="inline-message" role="status">The result is not confirmed. Check the status before trying again. Your balance will update only after confirmation.</p>':''}${t.state==='rejected'?'<p class="inline-message">The requirements haven’t been confirmed yet. Complete the task before checking again.</p>':''}${t.retryAt?`<p class="inline-message">Next check: <span data-deadline="${esc(t.retryAt)}">${remaining(t.retryAt,this.now())}</span></p>`:''}<button class="primary-btn full-width" data-sheet-action="${esc(t.id)}" ${a.disabled||this.review?'disabled':''}>${this.review&&!a.disabled?'Available inside CASE':a.label}${icon(a.kind==='navigate'?'arrow':a.kind==='claim'?'gift':'check-circle')}</button>${this.review?'<p class="quiet-note">Design review · sample task. No live action is performed.</p>':'<p class="quiet-note">Completion and rewards are confirmed by CASE.</p>'}`);
+    this.showSheet(`<div class="sheet-hero hero-${rarity}"><span class="sheet-halo" aria-hidden="true"></span><span class="sheet-beam" aria-hidden="true"></span><div class="detail-art">${taskGift(t.icon)}</div><span class="sheet-plinth" aria-hidden="true"></span></div><span class="detail-eyebrow">${COMPLETE.has(t.state)?'MILESTONE COMPLETE':t.category==='limited'?'LIMITED EDITION':t.category==='social'?'COMMUNITY':'YOUR NEXT STEP'}</span><h2 id="sheet-title">${esc(t.title)}</h2><p>${esc(t.description)}</p>${this.missionSteps(t)}<div class="detail-reward"><span>Reward</span><strong>${icon3d('ton')}+${rewardText(t.reward)} <small>${esc(t.reward.unit)}</small></strong></div><div class="detail-progress"><span>${esc(LABELS[t.state])}</span><strong>${t.progress} / ${t.target}</strong></div><div class="progress-track"><span style="width:${Math.min(100,t.progress/t.target*100)}%"></span></div>${t.expiresAt?`<p class="detail-expiry">${icon('clock')}Time left: <span data-deadline="${esc(t.expiresAt)}">${remaining(t.expiresAt,this.now())}</span></p>`:''}${t.state==='server_error'?'<p class="inline-message" role="status">The result is not confirmed. Check the status before trying again. Your balance will update only after confirmation.</p>':''}${t.state==='rejected'?'<p class="inline-message">The requirements haven’t been confirmed yet. Complete the task before checking again.</p>':''}${t.retryAt?`<p class="inline-message">Next check: <span data-deadline="${esc(t.retryAt)}">${remaining(t.retryAt,this.now())}</span></p>`:''}<button class="primary-btn full-width" data-sheet-action="${esc(t.id)}" ${a.disabled||this.review?'disabled':''}>${this.review&&!a.disabled?'Available inside CASE':a.label}${icon(a.kind==='navigate'?'arrow':a.kind==='claim'?'gift':'check-circle')}</button>${this.review?'<p class="quiet-note">Preview mission</p>':'<p class="quiet-note"></p>'}`);
     if(focused)this.dialog.querySelector('[data-sheet-action]:not(:disabled)')?.focus({preventScroll:true});
   }
-  async perform(id) {
+  missionSteps(t) {
+    const steps=t.steps||[{title:'Start your mission',description:t.description},{title:'Confirm completion',description:'Your progress updates once the requirements are confirmed.'},{title:'Collect your reward',description:'Your reward is ready when all requirements are complete.'}];
+    const visual='path';
+    const size=Math.min(visual==='reactor'?7:visual==='passport'?4:2,t.target);
+    const labels=visual==='reactor'?['D1','D2','D3','D4','D5','D6','D7']:visual==='passport'?['DISCOVER','EXPLORE','DECODE','CONNECT']:['YOU','YOUR FRIEND'];
+    const board=['reactor','passport','crew'].includes(visual)?`<div class="mission-board board-${visual}" aria-label="${t.progress} of ${t.target} complete">${Array.from({length:size},(_,i)=>`<div class="board-cell ${i<t.progress?'charged':''}">${icon3d(visual==='passport'?'check':visual==='reactor'?'bolt':'users')}<span>${labels[i]}</span></div>`).join('')}</div>`:'';
+    return `${board}<section class="mission-path" aria-label="Mission stages"><div class="mission-path-heading"><span>HOW TO COMPLETE</span><small>${steps.length} stages</small></div>${steps.map((step,i)=>`<details class="mission-step" ${i===0?'open':''}><summary><span class="step-number">${String(i+1).padStart(2,'0')}</span><strong>${esc(step.title)}</strong><span class="step-expand">+</span></summary><p>${esc(step.description)}</p></details>`).join('')}</section>`;
+  }
+  async perform(id, fromSheet=false) {
     const t=this.item(id);if(!t||this.busy.has(id))return;
     if(this.review){this.taskSheet(id);return;}
     const a=taskAction(t,this.now());if(a.disabled)return;
     if(a.kind==='details'){this.taskSheet(id);return;}
-    if(a.kind==='navigate'){await this.navigate(t.route);return;}
+    if(a.kind==='navigate'){if(!fromSheet){this.taskSheet(id);return;} await this.navigate(t.route,t.id);return;}
     this.busy.add(id);
     const generation=this.generation;
     const isClaim=a.kind==='claim',isRefresh=a.kind==='refresh',pending=this.keys.pending(id);
@@ -247,11 +270,11 @@ class RewardsApp {
       this.overrides.set(id,'server_error');this.render();this.toast('Couldn’t confirm the result. Please check its status.');
     } finally {if(generation===this.generation){this.busy.delete(id);this.updateClocks();}}
   }
-  async navigate(route) {
+  async navigate(route, taskId) {
     if(route==='rewards'){this.dialog.close();this.selectTab('tasks');this.root.querySelector('main').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});return;}
     if(!this.host){this.activeTask=null;this.showSheet(`<div class="detail-art"><img src="${giftImage('plush-pepe')}" alt="" width="80" height="80"></div><h2 id="sheet-title">Continue in CASE</h2><p>Your account, wallet and game progress live in the CASE Mini App.</p><a class="primary-btn full-width" href="https://t.me/case_official_ru_bot" target="_blank" rel="noopener noreferrer">Open CASE ${icon('arrow')}</a>`);return;}
     if(this.review){this.activeTask=null;this.showSheet(`<div class="detail-art">${collectible(route==='collection'?'gem':'rocket')}</div><h2 id="sheet-title">${esc(ROUTES[route]||'Explore CASE')}</h2><p>This opens the ${esc(ROUTES[route]||'selected')} section inside CASE. The design review stays on this page.</p><button class="primary-btn full-width" data-action="close">Back to rewards ${icon('arrow')}</button>`);return;}
-    try { await this.call('navigate',{route}); } catch {this.toast('This section is unavailable. Please open it inside CASE.');}
+    try { await this.call('navigate',{route,taskId}); } catch {this.toast('This section is unavailable. Please open it inside CASE.');}
   }
   selectTab(tab) {
     this.tab=tab==='achievements'?'achievements':'tasks';
@@ -269,9 +292,10 @@ class RewardsApp {
     const button=event.target.closest('button');if(!button||button.disabled)return;
     if(button.dataset.tab){this.selectTab(button.dataset.tab);return;}
     if(button.dataset.route){this.navigate(button.dataset.route);return;}
+    if(button.dataset.paletteId){this.setPalette(button.dataset.paletteId);return;}
     if(button.dataset.details){this.taskSheet(button.dataset.details);return;}
     if(button.dataset.taskAction){this.perform(button.dataset.taskAction);return;}
-    if(button.dataset.sheetAction){this.perform(button.dataset.sheetAction);return;}
+    if(button.dataset.sheetAction){this.perform(button.dataset.sheetAction,true);return;}
     switch(button.dataset.action){
       case 'ticker':{const ticker=this.root.querySelector('.gift-ticker');const paused=ticker.classList.toggle('is-paused');button.setAttribute('aria-pressed',String(paused));button.setAttribute('aria-label',paused?'Resume gift carousel':'Pause gift carousel');button.querySelector('small').textContent=paused?'PLAY':'GIFTS';break;}
       case 'menu':this.activeTask=null;this.showSheet(`<span class="detail-eyebrow">EXPLORE CASE</span><h2 id="sheet-title">Your next move.</h2><div class="menu-grid">${[['rewards','check','Tasks'],['weekly','bolt','Weekly'],['points','ton','Points'],['channel','send','News'],['invite','users','Invite'],['profile','gem','Profile']].map(([route,i,label])=>`<button data-route="${route}">${icon3d(i)}<span>${label}</span></button>`).join('')}</div>`);break;
@@ -281,6 +305,7 @@ class RewardsApp {
       case 'explore':this.root.querySelector('.filter-bar, .public-missions, .state-panel')?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});break;
       case 'achievements':this.selectTab('achievements');this.root.querySelector('.main-tabs').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});this.root.querySelector('#tab-achievements').focus({preventScroll:true});break;
       case 'balance':this.activeTask=null;this.showSheet(`<div class="detail-art">${taskGift('gem')}</div><span class="detail-eyebrow">YOUR REWARDS</span><h2 id="sheet-title">${rewardText(this.data?.balance)} <small>${esc(this.data?.balance?.unit||'TON')}</small></h2><p>${this.data?'Your latest balance from CASE. Rewards appear here after a successful claim.':'Connect through CASE to see your current balance.'}</p>${this.review?'<p class="inline-message">Sample balance for design review. No real account is connected.</p>':''}<button class="primary-btn full-width" data-action="close">Keep exploring ${icon('arrow')}</button>`);break;
+      case 'palette':this.activeTask=null;this.paletteSheet();break;
       case 'help':this.activeTask=null;this.showSheet(`<div class="detail-art">${taskGift('gift')}</div><h2 id="sheet-title">A few steps.<br>Something extra.</h2><ol class="help-steps"><li><span>01</span><div><strong>Find your next task</strong><p>Explore daily challenges, special editions and community tasks.</p></div></li><li><span>02</span><div><strong>Make progress</strong><p>Follow the task’s requirements. CASE confirms your progress.</p></div></li><li><span>03</span><div><strong>Claim your reward</strong><p>Once verified, collect your reward and watch your balance update.</p></div></li></ol><button class="primary-btn full-width" data-action="close">Let’s go ${icon('arrow')}</button>`);break;
     }
   }

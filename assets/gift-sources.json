@@ -1,0 +1,30 @@
+[
+  {
+    "file": "jelly-bunny",
+    "name": "JellyBunny",
+    "source": "https://t.me/nft/JellyBunny-1",
+    "imageSource": "https://fragment.com/file/gifts/jellybunny/thumb.webp",
+    "bytes": 3906
+  },
+  {
+    "file": "scared-cat",
+    "name": "ScaredCat",
+    "source": "https://t.me/nft/ScaredCat-1",
+    "imageSource": "https://fragment.com/file/gifts/scaredcat/thumb.webp",
+    "bytes": 4762
+  },
+  {
+    "file": "neko-helmet",
+    "name": "NekoHelmet",
+    "source": "https://t.me/nft/NekoHelmet-1",
+    "imageSource": "https://fragment.com/file/gifts/nekohelmet/thumb.webp",
+    "bytes": 5988
+  },
+  {
+    "file": "genie-lamp",
+    "name": "GenieLamp",
+    "source": "https://t.me/nft/GenieLamp-1",
+    "imageSource": "https://fragment.com/file/gifts/genielamp/thumb.webp",
+    "bytes": 4812
+  }
+]

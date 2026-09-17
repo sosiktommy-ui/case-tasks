@@ -22,6 +22,8 @@ export function validateSnapshot(value) {
   const rewardValid = reward => reward && text(reward.amount, 24) && /^\d+(\.\d{1,9})?$/.test(reward.amount) && text(reward.unit, 12);
   const itemValid = item => item && text(item.id, 128) && item.id.length > 0 && text(item.title, 100) &&
     text(item.description, 1000) && text(item.icon, 30) && safeNumber(item.progress) && safeNumber(item.target) && item.target > 0 &&
+    (!item.visual || ['path','passport','reactor','crew'].includes(item.visual)) &&
+    (!item.steps || (Array.isArray(item.steps) && item.steps.length <= 8 && item.steps.every(step=>step && text(step.title,100) && text(step.description,500)))) &&
     rewardValid(item.reward) && typeof item.canClaim === 'boolean' && typeof item.canVerify === 'boolean' &&
     (!item.expiresAt || (text(item.expiresAt, 40) && Number.isFinite(Date.parse(item.expiresAt)))) &&
     (!item.retryAt || (text(item.retryAt, 40) && Number.isFinite(Date.parse(item.retryAt)))) &&

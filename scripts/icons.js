@@ -21,6 +21,7 @@ const paths = {
     wheel:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/><path d="M12 2v8m0 4v8M2 12h8m4 0h8M5 5l5.5 5.5m3 3L19 19M5 19l5.5-5.5m3-3L19 5M8 3l3 7m2 4 3 7M3 8l7 3m4 2 7 3M3 16l7-3m4-2 7-3M8 21l3-7m2-4 3-7"/>',
     settings:'<path d="M4 7h16M4 17h16"/><circle cx="8" cy="7" r="3" fill="currentColor" stroke="none"/><circle cx="16" cy="17" r="3" fill="currentColor" stroke="none"/>',
     refresh:'<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 6a8 8 0 0 1 13 3M5 15a8 8 0 0 0 13 3"/>',
+    palette:'<path d="M12 3.2a8.8 8.8 0 1 0 0 17.6c1 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.1 0-1 .8-1.8 1.8-1.8H16a4.8 4.8 0 0 0 4.8-4.8c0-3.9-3.9-7-8.8-7Z"/><circle cx="7.6" cy="10.6" r="1.1"/><circle cx="12" cy="7.6" r="1.1"/><circle cx="16.4" cy="10.6" r="1.1"/>',
     star:'<path d="m12 2 3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-7Z"/>'
   };
 export function icon(name, cls = "") { return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.star}</svg>`; }

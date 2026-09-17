@@ -14,6 +14,7 @@ const TONES = {
   mint:    {l:'#DFFFF3', m:'#79F0C6', d:'#1FB98E', s:'#08594A', g:'#2FD6A2', rim:'#9CF6DC'},
   indigo:  {l:'#E9EDFF', m:'#9FAFFF', d:'#4456E8', s:'#181F8C', g:'#5B72FF', rim:'#C3CDFF'},
   azure:   {l:'#E4F6FF', m:'#7FD0FF', d:'#0F86E4', s:'#053C7E', g:'#2FA8FF', rim:'#A9E4FF'},
+  lime:    {l:'#F4FFDC', m:'#C9FF72', d:'#6DBE12', s:'#2C5A04', g:'#9CFF2E', rim:'#E0FFAE'},
   teal:    {l:'#DCFFFA', m:'#6FF0E2', d:'#16B8AB', s:'#065A55', g:'#2FD6C6', rim:'#A8F7EE'},
   steel:   {l:'#F2F6FF', m:'#B8C6E6', d:'#6B7BA8', s:'#25304F', g:'#8FA5D8', rim:'#D6E2FA'}
 };

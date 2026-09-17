@@ -1,28 +1,65 @@
-# CASE — Tasks & Rewards
+# CASE — NFT Gifts v11
 
-English frontend for CASE Tasks and Achievements. Charcoal CASE shell, shared animated gift rail, blue Wheel navigation, yellow promotional banner and real Telegram Gift imagery.
+Готовый интерфейс вкладки Tasks: HTML, CSS и JavaScript ES modules. Сборка и внешние зависимости не требуются. Язык интерфейса — английский.
 
-## Entries
+## Просмотр
 
-- index.html: full Tasks and Achievements page. The approved task list, filters, progress and reward cards are always visible. Without a CASE host it uses clearly indicated preview account data; real claims are disabled. With a host it displays authenticated server data.
-- embed.html: production integration entry without preview fallback. Pass CASE_TASKS_EMBEDDED=true when the host already renders its shell and gift rail.
-- preview.html: isolated, explicitly labelled design review with sample tasks. Never imported by the production entry.
+Запустить HTTP-сервер в этой папке (`python -m http.server 8080`) и открыть `http://localhost:8080/index.html`.
 
-The full task interface switches on when the developer provides window.CASE_TASKS_HOST. API integration, identity, wallet operations and real reward issuing belong to CASE. No server credentials are needed in this page.
+- `index.html` — просмотр дизайна; без host использует демонстрационный каталог.
+- `embed.html` — точка интеграции; демонстрационные данные не подключаются.
+- `preview/catalog.js` — 16 предложенных заданий. Условия и суммы являются примерами, требуют настройки заказчиком.
+- `scripts/host-contract.d.ts` — типы данных и методов интеграции.
+- `scripts/nft-art.js`, `scripts/gifts.js`, `assets/*.webp` — оригинальные Telegram Gifts и композиции из них.
+- `styles.css`, `mission.css`, `nft.css` — базовые стили и оформление NFT Gifts; подключать в этом порядке.
 
-## Local run
+## Подключение
 
-Serve this directory over HTTP (for example: python -m http.server 4173). Open http://127.0.0.1:4173/. No install or build step.
+```js
+import { mountCaseTasks } from './scripts/app.js';
 
-## Files
+const view = mountCaseTasks(document.getElementById('tasks-root'), {
+  host: caseTasksAdapter,
+  embedded: true
+});
+// При выходе из вкладки:
+view.destroy();
+// При смене аккаунта:
+view.setHost(nextAccountAdapter);
+```
 
-- scripts/app.js: UI, tabs, shared carousel, dialogs and host lifecycle.
-- scripts/model.js: state validation, exact decimal display, operation identity.
-- scripts/gifts.js: public collectible assets.
-- scripts/main.js: production bootstrap.
-- styles.css: responsive surfaces, depth and motion with reduced-motion support.
-- docs/INTEGRATION.md: complete adapter contract and server responsibilities.
-- docs/ASSETS.md: public sources and illustration provenance.
-- docs/QA.md: checks and limits.
+`embedded:true` скрывает общую шапку, баланс, ленту и нижнюю навигацию. Внешнюю оболочку предоставляет CASE. Для полной страницы использовать `embedded:false`. Стили содержат глобальные правила `body`, `button` и `:root`: при переносе в существующее приложение изолировать в iframe или ограничить область стилей контейнером вкладки.
 
-The carousel displays collectible designs, not fabricated live wins. Collection cards are illustrative and do not promise that a pictured gift is a task reward.
+При использовании `embed.html` установить `window.CASE_TASKS_HOST` до запуска `scripts/main.js`. При отсутствии host личные задания и баланс не выдумываются.
+
+## Данные из админки
+
+`getSnapshot` возвращает актуальные задачи, этапы, награды и состояния. Добавление задачи не требует изменения разметки. Контракт приведён в `scripts/host-contract.d.ts`.
+
+Витрины подарков: `bear`, `duck`, `backpack`, `lamp`, `ghost`, `witch`, `fighters`, `bunny`, `cat`, `helmet`, `genie`, `spooky`, `golden`, `friends`; маппинг в scripts/nft-art.js.
+
+Иконки интерфейса: `capsule`, `rocket`, `ticket`, `compass`, `trophy`, `gem`, `users`, `satellite`, `ton`, `bolt`, `grid`, `check`, `crown`, `send`, `wheel`, `craft`. Старые имена поддерживаются через aliases. Неизвестная иконка отображается как капсула. Произвольный HTML не принимается.
+
+`steps` — до 8 раскрывающихся этапов. Открытие этапа не изменяет прогресс. `visual` сохранён для совместимости данных; в версии NFT Gifts используется единая витрина подарков с этапами.
+
+`navigate({route,taskId})` позволяет открыть конкретную кампанию: партнёрский канал, викторину, голосование, профиль или другое действие. Адрес партнёра и действия определяет host по `taskId`. Внешние URL из полей задачи не исполняются. Формы викторины, отправка ответа, голосования и реферальная логика реализуются на стороне CASE.
+
+`subscribe(callback)` необязателен; вызывает обновление после изменений на сервере. `refresh()` позволяет обновить данные вручную.
+
+## Состояния и награды
+
+`verifyTask` возвращает полный Snapshot. `claimReward` и `getOperation` возвращают `{status,snapshot}`. `status`: pending, succeeded, failed, not_found. Успешный результат требует состояния claimed/already_claimed в snapshot. Сумма — десятичная строка, единица — TON или предоставленная host.
+
+Начисление, идентификация Telegram-пользователя, проверка подписки/условий, дедупликация запросов и изменение баланса выполняются сервером. Клиент не начисляет награды самостоятельно. После неопределённого результата сохраняет ключ операции и предлагает проверить статус. Revision монотонно возрастает; старый ответ не перезаписывает новые данные.
+
+Уникальный `id` относится к конкретному заданию и периоду для аккаунта. Не переиспользовать один ID для новых ежедневных заданий.
+
+## Оформление
+
+Две палитры: CASE / Arctic blue и Mint / Graphite, переключаются кнопкой в шапке. Движение отключается через `prefers-reduced-motion`. Диалоги поддерживают Escape и возврат фокуса.
+
+## Проверки
+
+12 браузерных сценариев состояний и операций прошли на локальных тестовых адаптерах. Проверены ширины 320, 360, 390, 430, 540, 768, 1440 без горизонтального переполнения. Реальный API CASE и Telegram WebView не предоставлялись и не проверялись.
+
+Открыть локальную страницу и выполнить `import('/tests/browser-tests.js').then(m => m.runTests())` для запуска проверок.

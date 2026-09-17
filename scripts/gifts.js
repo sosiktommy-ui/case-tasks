@@ -1,4 +1,5 @@
 export const gifts = [
+{"file": "jelly-bunny", "name": "JellyBunny", "source": "https://t.me/nft/JellyBunny-1"},{"file": "scared-cat", "name": "ScaredCat", "source": "https://t.me/nft/ScaredCat-1"},{"file": "neko-helmet", "name": "NekoHelmet", "source": "https://t.me/nft/NekoHelmet-1"},{"file": "genie-lamp", "name": "GenieLamp", "source": "https://t.me/nft/GenieLamp-1"},
   {
     "file": "plush-pepe",
     "name": "Plush Pepe",
