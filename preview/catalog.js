@@ -1,4 +1,3 @@
-// Presentation catalog. The host supplies approved conditions and reward amounts.
 export const missionCatalog = [
   {id:'daily-signal',title:'Your daily gift',description:'Check in today and collect your daily reward.',icon:'capsule',category:'daily',route:'rewards',progress:1,target:1,amount:'0.02',state:'verified',steps:[['Open mission control','Visit your Tasks tab today.'],['Collect today’s energy','One check-in is counted per calendar day.'],['Claim your TON','Collect your confirmed daily reward.']]},
   {id:'daily-explorer',title:'The discovery trail',description:'Discover three corners of the CASE universe.',icon:'compass',category:'daily',route:'home',progress:1,target:3,amount:'0.03',steps:[['Visit collections','Explore the collection catalogue.'],['Discover achievements','Find a milestone you want to reach.'],['Meet the community','Open the official CASE community page.']]},

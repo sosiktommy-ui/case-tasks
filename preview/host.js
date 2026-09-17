@@ -1,5 +1,4 @@
 import {missionCatalog} from './catalog.js?v=12';
-// Presentation data for index.html and preview.html when no CASE host exists. embed.html never imports this file.
 export function createPreviewHost() {
   const now = Date.now();
   const until = hours => new Date(now + hours * 3600000).toISOString();

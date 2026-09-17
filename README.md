@@ -1,4 +1,4 @@
-# CASE — NFT Gifts v11
+# CASE — NFT Gifts v12
 
 Готовый интерфейс вкладки Tasks: HTML, CSS и JavaScript ES modules. Сборка и внешние зависимости не требуются. Язык интерфейса — английский.
 

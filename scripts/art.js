@@ -1,4 +1,3 @@
-// Original vector collectibles. UI navigation uses the separate outline icon family.
 let serial = 0;
 export function collectible(kind, className = '') {
   const id = `case-art-${++serial}`;

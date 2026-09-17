@@ -55,7 +55,6 @@ export function escapeHTML(value) {
 }
 export function rewardText(reward) {
   if (!reward) return '—';
-  // Display decimal strings without converting money through floating-point arithmetic.
   const [whole, decimal] = reward.amount.split('.');
   const formatted = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return `${formatted}${decimal === undefined ? '' : '.' + decimal}`;
@@ -79,7 +78,6 @@ export function taskAction(task, now) {
   return {label:'View details', kind:'details'};
 }
 
-// IDs contain no credential or account data. Server-side ownership remains mandatory.
 export class ClaimKeys {
   constructor(storage) {
     try { this.storage = storage === undefined ? globalThis.sessionStorage : storage; } catch { this.storage = null; }
@@ -89,10 +87,10 @@ export class ClaimKeys {
     const key = `case:claim:${id}`;
     if (this.memory.has(key)) return this.memory.get(key);
     let value;
-    try { value = this.storage?.getItem(key); } catch { /* memory fallback */ }
+    try { value = this.storage?.getItem(key); } catch {}
     if (!value || !/^[a-zA-Z0-9-]{16,100}$/.test(value)) value = crypto.randomUUID();
     this.memory.set(key, value);
-    try { this.storage?.setItem(key, value); } catch { /* retries in this page remain stable */ }
+    try { this.storage?.setItem(key, value); } catch {}
     return value;
   }
   pending(id) {

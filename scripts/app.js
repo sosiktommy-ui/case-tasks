@@ -6,12 +6,10 @@ import { PALETTES, readPalette, savePalette, tonesFor } from './themes.js?v=12';
 import { collectible } from './art.js?v=12';
 import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=12';
 
-const ASSET = new URL('../assets/reward-gift-v2.png', import.meta.url).href;
 const GOLD = new URL('../assets/collectible-trio.png', import.meta.url).href;
 const BUNNY = giftImage('heart-locket');
 const taskGift = kind => nftArt(kind);
 const FAVICON = new URL('../assets/favicon-v2.svg', import.meta.url).href;
-const BOLT3D = new URL('../assets/bolt-3d.webp', import.meta.url).href;
 const boltArt = () => icon3d('bolt','art3d');
 const LABELS = {
   available:'Ready to start', in_progress:'In progress', verifying:'Verifying your task',

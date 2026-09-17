@@ -1,5 +1,3 @@
-// Run in a local browser: import('/tests/browser-tests.js').then(m => m.runTests()).
-// Every host below is an in-memory test double. No CASE requests are made.
 import { mountCaseTasks } from '../scripts/app.js';
 import { validateSnapshot, validateOperation, taskAction, rewardText, remaining } from '../scripts/model.js';
 import { createPreviewHost } from '../preview/host.js';

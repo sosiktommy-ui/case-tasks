@@ -1,8 +1,3 @@
-// CASE — original 3D icon family.
-// Every icon is assembled the same way: an extruded body behind the face, a
-// metal rim, a multi-stop face gradient, a clipped glass sweep and a coloured
-// ambient glow. Drawn from scratch for this page; nothing is traced from
-// third-party artwork.
 let serial = 0;
 
 const TONES = {
@@ -19,12 +14,9 @@ const TONES = {
   steel:   {l:'#F2F6FF', m:'#B8C6E6', d:'#6B7BA8', s:'#25304F', g:'#8FA5D8', rim:'#D6E2FA'}
 };
 
-// A tapered sun ray, repeated around the disc.
 const ray = angle => `<path d="M29.2 14.6 30.6 2.4a1.4 1.4 0 0 1 2.8 0l1.4 12.2Z" transform="rotate(${angle} 32 32)"/>`;
 const rays = [0, 45, 90, 135, 180, 225, 270, 315].map(ray).join('');
 
-// 64×64 grid. `body` is the silhouette: it is extruded, filled and used as the
-// glass clip. `top` draws details that sit above the glass.
 const SHAPES = {
   bolt: {
     tone:'gold', rim:3.4,
