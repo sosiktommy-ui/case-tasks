@@ -1,76 +1,56 @@
-# Передача разработчику
+# CASE host integration
 
-## Отдельный экран
+## Bootstrap
 
-Это plain HTML/CSS/JS без сборки. При интеграции перенесите разметку `main` и диалоги в принятые компоненты проекта. Верхний профиль, нижняя навигация и desktop presentation — демонстрационная оболочка: если приложение уже рисует её, не дублируйте. CSS сейчас оформляет отдельную страницу; при переносе в SPA ограничьте селекторы контейнером компонента. Удалите подписки при размонтировании.
+Set window.CASE_TASKS_HOST before scripts/main.js starts. Or import mountCaseTasks from scripts/app.js and pass {host, embedded:true}. It returns destroy(), refresh() and setHost(host). Destroy on unmount. On account changes use setHost with a new authenticated host; this aborts old requests and clears previous account data.
 
-## Источник данных
+The default index uses no fixture fallback. When no host exists, it displays public discovery and Open CASE links. preview.html is a separate review-only entry. No demo data is imported by index.html or embed.html.
 
-`app.js` использует `window.CaseTasksAPI`, если он установлен до загрузки скрипта; иначе включает `CaseTasksDemo`. Демонстрационный адаптер надо полностью исключить из production build. Нельзя использовать его вычисления или seed как действительные правила кампаний.
+## Host methods
 
-Намеченный интерфейс:
+All methods return promises and accept an AbortSignal. Never log signed Telegram data or credentials.
 
-```js
-// Ниже интерфейс, не готовая реализация production API.
-window.CaseTasksAPI = {
-  list: async () => snapshot,
-  verify: async (taskId) => snapshot,
-  claim: async (taskId) => snapshot,
-};
-```
+- getSnapshot({signal}) -> Snapshot
+- verifyTask({taskId, signal}) -> Snapshot
+- claimReward({taskId, idempotencyKey, signal}) -> OperationResult
+- getOperation({taskId, idempotencyKey, signal}) -> OperationResult
+- navigate({route, signal}) -> void
+- subscribe(onChange) -> unsubscribe (optional; callback triggers a debounced snapshot refresh)
 
-`snapshot` содержит:
+Routes: home, inventory, invite, leaderboard, rewards, deposit, cases, crash, channel, collection, upgrade, wheel, craft, wallet, weekly, profile, points. The host maps these semantic names to its own router or wallet UI. No arbitrary URLs from responses are executed.
 
-```json
-{
-  "tasks": [{
-    "id": "server-issued-id",
-    "title": "Public task title",
-    "description": "Public task conditions",
-    "category": "social",
-    "subtitle": "Official channel",
-    "icon": "send",
-    "tone": "social",
-    "reward": 250,
-    "state": "verified"
-  }],
-  "balance": 1250,
-  "ledger": [{"title": "Task reward", "amount": 250}]
-}
-```
+## Snapshot
 
-Все численные значения в примере условные; текущий макет отображает points. Production contract потребует точных единиц, пагинации/отдельного получения ledger, server time, expiry, retry_after, разрешённых действий и идентификаторов операций. Этот пример не претендует на существующую схему CASE.
+Object fields:
 
-`verify` и `claim` получают только ID из интерфейса; размер награды, баланс, user ID и completion не передаются как авторитетное утверждение UI. Для настоящего `claim` адаптер должен хранить idempotency key/operation ID для логической операции и после неопределённого результата сверять серверный статус. При повторном входе UI получает свежее состояние.
+- revision: nonnegative safe integer, monotonically increasing per authenticated account snapshot. A response with an older revision cannot replace newer state.
+- serverNow: ISO time from server.
+- balance: null or {amount: decimal string, unit: string}; no binary floating point math for balances.
+- tasks: array of Task, maximum 100.
+- achievements: array of Task without required category, maximum 100.
 
-## Состояния
+Task fields: id, title, description, icon, progress, target, reward {amount, unit}, state, canClaim, canVerify. Optional: expiresAt, retryAt, route, featured. tasks require category daily, limited or social. id must be opaque and unique per account/task-period instance; never use only a reusable daily template ID. Progress is a finite nonnegative number; target is positive. Amount is a nonnegative decimal string, up to 24 characters and 9 fractional digits. Text and arrays are bounded in model.js.
 
-| API state | UI | Награда |
-|---|---|---|
-| `available` | Start task → подробности | Не начислена |
-| `verifying` | Verifying… | Не начислена |
-| `verified` | Claim reward | Выполнение подтверждено; claim отдельно |
-| `claiming` | Claiming… | Ожидание результата |
-| `claimed` / `already_claimed` | Completed / Claimed | Подтверждена источником данных |
-| `rejected` | Try again | Не подтверждена |
-| `expired` | Expired, действие отключено | Новый claim недоступен |
-| `retry_available` | Try again | Повтор разрешён источником данных |
-| `server_error` | Refresh status | Результат неизвестен; не считать отказом |
+States: available, in_progress, verifying, verified, rejected, already_claimed, claimed, expired, retry_available, server_error, claiming. Claim is offered only for verified + canClaim. Expiry/retry UI uses serverNow plus elapsed monotonic time. UI progress never establishes completion or reward eligibility.
 
-Для `rejected` текущий mock разрешает повтор. В production право повторять и время следующей попытки должны приходить с сервера, а не выводиться только из имени состояния. Долгая асинхронная verification требует согласованного ограниченного polling или push; в макете это конечная демо-задержка. Production-обработчик может заменить технические ошибки безопасными reason codes.
+## Claim operations
 
-## Интеграционные события
+OperationResult = {status: pending | succeeded | failed | not_found, snapshot: Snapshot}.
 
-- `document` → `case:navigate`, `event.detail.route`: main / upgrade / wheel / craft / weekly / news / invite. В demo показывается объяснение границы макета. Реальные маршруты необходимо подключить к роутеру приложения.
-- `document` → `case:open-task`, `event.detail.taskId`: вызывается при открытии задания с реальным адаптером. Host определяет разрешённый URL по своей схеме и открывает его стандартным способом. Не доверять произвольным URL из непроверенного ввода.
-- Профиль и история — демонстрационные диалоги. Их нужно заменить реальными компонентами приложения; инъекция API сама по себе не превращает весь макет в production UI.
+succeeded requires the requested task to exist in the snapshot with state claimed or already_claimed. pending leaves the claim unresolved. On timeout, network failure or uncertain result, the same idempotencyKey is retained, and Check status calls getOperation. A definitive failed result permits a fresh operation key. not_found must mean authoritative absence; a later claim reuses the original key. Server must deduplicate irrespective of transport cancellation or client restarts.
 
-## Обязательная серверная ответственность
+Session storage keeps only opaque operation keys and pending markers. If storage is unavailable, there is an in-memory fallback; the server remains responsible for persistent deduplication across reloads/devices. No retry loop performs claims automatically. No optimistic balance increment is used.
 
-Telegram initData валидировать на сервере, проверять свежесть и ownership. Eligibility и размер reward брать из серверных правил. Claim и ledger проводить атомарно с уникальным бизнес-ограничением; нажатия и состояние кнопки не защищают от повторного начисления. Кошелёк/списание/вывод в эту страницу не включены.
+## Required backend controls
 
-Официальный источник по аутентификации: [Telegram Mini Apps](https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app). Реализация backend CASE не проверялась.
+Validate Telegram authentication and freshness on the server; initDataUnsafe and a Telegram user ID alone are not proof of identity. Bind the session, task ownership and claim eligibility to the authenticated user. Compute rewards, prices and balance changes on the server. Atomically record completion, unique claim and ledger entry. Repeated claims must return the same logical outcome. Spending/withdrawal is outside this tab and must use authoritative ledger constraints and its own authorization.
 
-## Чего нет в пакете
+The frontend validation is for robustness, not a security boundary. The host must handle logout, expired sessions, authorization failures, subscriptions and wallet routing. Navigation must not fabricate successful payments or task completion.
 
-Частной переписки, пользовательских скриншотов, базы знаний, credentials и сведений о закрытых кампаниях. Ничего не публиковалось и не отправлялось заказчику автоматически.
+## Shell and embedding
+
+With embedded:true the host header, balance, gift rail and bottom navigation are hidden to avoid duplicating CASE chrome. If replacing the full tab, use embedded:false. Supply real live-gift activity in the host shell; this standalone rail is labelled GIFTS and shows collection artwork, never invented live wins. Styles currently include document-level defaults: scope them when integrating into an existing global stylesheet.
+
+## Release boundary
+
+This delivery implements the frontend. No production CASE API or signed session was supplied; backend integration and in-Telegram device testing remain required before enabling real claims. The public GitHub Pages site is a static frontend and cannot validate Telegram sessions or issue rewards itself.

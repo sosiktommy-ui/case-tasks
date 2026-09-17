@@ -1,4 +1,4 @@
-import { mountCaseTasks } from './app.js';
+import { mountCaseTasks } from './app.js?v=3';
 
 // No preview fallback. A missing integration never invents account data.
 window.caseTasks = mountCaseTasks(document.getElementById('case-tasks-root'), {

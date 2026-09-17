@@ -1,26 +1,2 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#070b15">
-  <meta name="color-scheme" content="dark">
-  <title>CASE — Rewards</title>
-  <meta name="description" content="CASE Rewards — tasks and achievements screen. Design preview with sample content.">
-  <link rel="icon" href="assets/favicon-v2.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <a class="skip-link" href="#tasks-content">Skip to rewards</a>
-  <div class="review-strip"><span>CASE · REWARDS</span><span>Design preview · sample content</span></div>
-  <div id="case-tasks-root"></div>
-  <script type="module">
-    import { createPreviewHost } from './preview/host.js';
-    import { mountCaseTasks } from './scripts/app.js';
-    window.caseTasks = mountCaseTasks(document.getElementById('case-tasks-root'), {
-      host: createPreviewHost(), review: true
-    });
-  </script>
-  <noscript><p class="no-script">Please enable JavaScript to open the preview.</p></noscript>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#070b15"><meta name="color-scheme" content="dark"><title>CASE — Tasks & Rewards</title><meta name="description" content="Explore CASE tasks, achievements and Telegram collectibles. Open CASE to see your personal progress and rewards."><link rel="icon" href="assets/favicon-v2.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css?v=3"></head><body><a class="skip-link" href="#tasks-content">Skip to rewards</a><div id="case-tasks-root"></div><!-- The CASE host provides window.CASE_TASKS_HOST before this module starts. --><script type="module" src="scripts/main.js?v=3"></script><noscript><p class="no-script">Please enable JavaScript to open your rewards.</p></noscript></body></html>

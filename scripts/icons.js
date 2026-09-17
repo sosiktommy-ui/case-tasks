@@ -1,4 +1,5 @@
 const paths = {
+    wallet:'<path d="M4 6h15v14H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h13v2M15 10h6v6h-6z"/><path d="M18 13h.01"/>',
     arrow:'<path d="M5 12h14m-5-5 5 5-5 5"/>',
     chevron:'<path d="m9 5 7 7-7 7"/>',
     info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.2"/>',

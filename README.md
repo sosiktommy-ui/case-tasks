@@ -1,45 +1,28 @@
-# CASE — Rewards
+# CASE — Tasks & Rewards
 
-Раздел заданий и достижений CASE: страница для показа дизайна и последующей интеграции.
+English frontend for CASE Tasks and Achievements. Charcoal CASE shell, shared animated gift rail, blue Wheel navigation, yellow promotional banner and real Telegram Gift imagery.
 
-**Демо:** https://sosiktommy-ui.github.io/case-tasks/
+## Entries
 
-## Страницы
+- index.html: production entry. No sample account, balance, task progress or rewards. Without a CASE host, shows a public discovery view and working links to the official Mini App and gift pages.
+- embed.html: production entry for integration into CASE. Same behavior; pass CASE_TASKS_EMBEDDED=true when the host already renders its shell and gift rail.
+- preview.html: isolated, explicitly labelled design review with sample tasks. Never imported by the production entry.
 
-| Файл | Назначение |
-|---|---|
-| `index.html` | Демо для показа. Данные берутся из `preview/host.js` — примеры, не реальный аккаунт. Кнопки Claim и Check отключены. |
-| `embed.html` | Продакшен-вариант для встраивания. Ждёт `window.CASE_TASKS_HOST` от хоста CASE и без него не показывает ни заданий, ни баланса. |
+The full task interface switches on when the developer provides window.CASE_TASKS_HOST. API integration, identity, wallet operations and real reward issuing belong to CASE. No server credentials are needed in this page.
 
-## Исходники
+## Local run
 
-| Путь | Назначение |
-|---|---|
-| `scripts/app.js` | Монтирование, рендер, экраны Tasks / Achievements, диалоги |
-| `scripts/model.js` | Валидация ответов хоста, состояния заданий, тексты наград и таймеров |
-| `scripts/icons.js`, `scripts/art.js` | Линейные пиктограммы и векторные иллюстрации, нарисованные для проекта |
-| `scripts/main.js` | Точка входа `embed.html` |
-| `preview/host.js` | Примерные данные только для `index.html`; продакшен их не подключает |
-| `styles.css` | Стили, адаптивность, reduced motion |
-| `assets/` | Иллюстрации и favicon |
-| `tests/browser-tests.js` | Браузерные тесты на хост-двойниках |
-| `docs/INTEGRATION.md` | Контракт интеграции |
-| `docs/QA.md` | Выполненные проверки и ограничения |
+Serve this directory over HTTP (for example: python -m http.server 4173). Open http://127.0.0.1:4173/. No install or build step.
 
-## Локальный запуск
+## Files
 
-```text
-python -m http.server 4173
-```
+- scripts/app.js: UI, tabs, shared carousel, dialogs and host lifecycle.
+- scripts/model.js: state validation, exact decimal display, operation identity.
+- scripts/gifts.js: public collectible assets.
+- scripts/main.js: production bootstrap.
+- styles.css: responsive surfaces, depth and motion with reduced-motion support.
+- docs/INTEGRATION.md: complete adapter contract and server responsibilities.
+- docs/ASSETS.md: public sources and illustration provenance.
+- docs/QA.md: checks and limits.
 
-Затем http://127.0.0.1:4173. Тесты — в консоли на запущенной странице:
-
-```js
-import('/tests/browser-tests.js').then(m => m.runTests()).then(console.table)
-```
-
-## Границы
-
-Задания, суммы и прогресс на демо-странице — примеры, а не действующие кампании CASE. Регистрации, Telegram-авторизации, кошелька, платежей и вывода на странице нет; внешних запросов она не делает. Реальные баланс и начисления появятся только после подключения API CASE через `embed.html`.
-
-Шрифт системный: брендовые шрифты CASE не предоставлены. Английский язык интерфейса выбран по предоставленным экранам — это рабочее решение, а не утверждённое требование.
+The carousel displays collectible designs, not fabricated live wins. Collection cards are illustrative and do not promise that a pictured gift is a task reward.

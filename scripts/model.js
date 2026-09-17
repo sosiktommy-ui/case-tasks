@@ -4,7 +4,7 @@ export const STATES = new Set([
 ]);
 export const COMPLETE = new Set(['claimed', 'already_claimed']);
 const CATEGORIES = new Set(['daily', 'limited', 'social']);
-const ALLOWED_ROUTES = new Set(['home', 'inventory', 'invite', 'leaderboard', 'rewards', 'deposit', 'cases', 'crash', 'channel', 'collection']);
+const ALLOWED_ROUTES = new Set(['home', 'inventory', 'invite', 'leaderboard', 'rewards', 'deposit', 'cases', 'crash', 'channel', 'collection', 'upgrade', 'wheel', 'craft', 'wallet', 'weekly', 'profile', 'points']);
 const text = (value, max = 400) => typeof value === 'string' && value.length <= max;
 const safeNumber = value => Number.isFinite(value) && value >= 0;
 

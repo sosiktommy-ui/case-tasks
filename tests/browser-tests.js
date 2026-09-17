@@ -39,7 +39,10 @@ export async function runTests() {
     await test('Production without host shows no invented tasks or balance',async()=>{
       await mount(undefined);assert(root.querySelectorAll('[data-card]').length===0,'Sample tasks leaked');
       assert(root.querySelector('#balance-value').textContent.includes('—'),'Balance fabricated');
-      assert(root.textContent.includes('Open this page inside CASE'),'Missing integration state');
+      assert(root.textContent.includes('Open CASE to load your personal tasks'),'Missing integration state');
+    });
+    await test('Gift rail persists across tabs and can be paused',async()=>{
+      const rail=root.querySelector('.gift-ticker');assert(rail,'Missing gift carousel');root.querySelector('[data-tab=achievements]').click();assert(root.querySelector('.gift-ticker')===rail,'Tab replaced shared carousel');root.querySelector('[data-action=ticker]').click();assert(rail.classList.contains('is-paused'),'Pause does not work');assert(root.querySelector('[data-action=ticker]').getAttribute('aria-pressed')==='true','Pause state missing');root.querySelector('[data-tab=tasks]').click();
     });
     await test('Review never calls claim or verify',async()=>{
       let mutations=0;const data=sample(),host=hostFor(data);

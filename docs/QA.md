@@ -1,24 +1,22 @@
-# Проверка первой версии
+# Validation — 17 September 2026
 
-Дата: 17.09.2026, Europe/Warsaw. Среда: локальный браузер Chromium через Playwright. Проверялся только этот макет, не действующая Mini App CASE.
+12 automated browser checks passed using local in-memory hosts:
 
-## Пройдено
+- Invalid snapshot/claim states rejected; decimal formatting preserves precision.
+- Production without host has no invented task data or balance.
+- Shared gift rail persists across Tasks/Achievements and supports pause.
+- Review entry never calls claim/verify.
+- Double click submits one claim; displayed balance comes from server snapshot.
+- Uncertain claim survives remount and retains operation identity until confirmed.
+- Rejected verification grants nothing.
+- Stale revisions cannot overwrite latest data.
+- Host/account switching discards old in-flight responses.
+- Untrusted title/description display as text.
+- Retry is gated by server-based time.
+- Destroy cleans up mounted UI.
 
-- Фильтры: Social — 2 карточки, Daily — 2 карточки; All восстанавливает список.
-- Проверка → verified → claim: 1 250 → 1 400 за community; затем 1 650 после channel. В Completed стало 4 записи.
-- Два одновременных и один повторный claim одной демо-задачи: одна запись ledger, баланс 1 400. Это проверка mock, не гарантия backend CASE.
-- rejected, expired, retry_available, server_error не начисляют points: баланс остаётся 1 250.
-- После демо-ошибки Refresh status восстанавливает подтверждённое состояние из адаптера.
-- Размеры 320×740, 375×812, 390×844, 460×900, 768×1024, 1440×1000 и 844×390: горизонтального переполнения нет.
-- Escape закрывает справку и возвращает фокус на открывшую кнопку.
-- При prefers-reduced-motion длительность CSS-переходов — 0s.
-- На проверенных загрузках нет JavaScript page errors и запросов на внешние адреса.
-- Синтаксис app.js и demo-api.js проверен; мобильный и desktop-виды визуально просмотрены.
+Responsive browser check: Tasks and Achievements at 320, 360, 390, 430, 768 and 1440 px: no document horizontal overflow. Menu opens, Escape closes, focus returns. Reduced-motion disables the carousel animation. All page images loaded; no uncaught JavaScript errors in the final local run.
 
-## Пределы проверки
+Run local suite after mounting: window.caseTasks.destroy(); import('/tests/browser-tests.js').then(m => m.runTests()).then(console.table).
 
-Нет теста на настоящем iOS/Android Telegram WebView, screen reader, реальном backend и платёжной системе. Полный аудит WCAG и реальный системный масштаб шрифта не проводились. Встроенные системные шрифты могут различаться между устройствами. Требуется визуальная приёмка заказчиком и подтверждение контента.
-
-Демо-управление позволяет вручную повторить состояния: внизу экрана Interactive preview → Next verification result → открыть непройденную задачу → Check task. Перезагрузка сбрасывает данные.
-
-Дополнительно проверен маршрут Preview task → Return & check task: возврат открывает то же задание; никаких действий в Telegram не выполняется.
+Not tested: real CASE API, Telegram initData validation, account authorization, real wallet, reward ledger, withdrawals, or native Telegram iOS/Android WebViews. These are integration responsibilities, not implied passes. No production account/financial/reward operations were attempted.
