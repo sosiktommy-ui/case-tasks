@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#070b15"><meta name="color-scheme" content="dark"><title>CASE — Tasks & Rewards</title><meta name="description" content="CASE tasks, achievements and collectible rewards."><link rel="icon" href="assets/favicon-v2.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css?v=14"><link rel="stylesheet" href="mission.css?v=14"><link rel="stylesheet" href="nft.css?v=14"><link rel="stylesheet" href="road.css?v=14"></head><body><a class="skip-link" href="#tasks-content">Skip to rewards</a><div id="case-tasks-root"></div><script type="module">
-import { mountCaseTasks } from './scripts/app.js?v=14';
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#070b15"><meta name="color-scheme" content="dark"><title>CASE — Tasks & Rewards</title><meta name="description" content="CASE tasks, achievements and collectible rewards."><link rel="icon" href="assets/favicon-v2.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css?v=15"><link rel="stylesheet" href="mission.css?v=15"><link rel="stylesheet" href="nft.css?v=15"><link rel="stylesheet" href="road.css?v=15"></head><body><a class="skip-link" href="#tasks-content">Skip to rewards</a><div id="case-tasks-root"></div><script type="module">
+import { mountCaseTasks } from './scripts/app.js?v=15';
 const host = window.CASE_TASKS_HOST;
-const displayHost = host || (await import('./preview/host.js?v=14')).createPreviewHost();
+const displayHost = host || (await import('./preview/host.js?v=15')).createPreviewHost();
 window.caseTasks = mountCaseTasks(document.getElementById('case-tasks-root'), {host:displayHost,review:!host,embedded:window.CASE_TASKS_EMBEDDED === true});
 if(!host) document.querySelector('.balance-control small').textContent='Preview balance';
 </script><noscript><p class="no-script">Please enable JavaScript to open your rewards.</p></noscript></body></html>

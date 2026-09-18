@@ -1,10 +1,10 @@
-import { gifts, giftImage } from './gifts.js?v=14';
-import { icon } from './icons.js?v=14';
-import { icon3d } from './icons3d.js?v=14';
-import {nftArt} from './nft-art.js?v=14';
-import { PALETTES, readPalette, savePalette, tonesFor, readView, saveView } from './themes.js?v=14';
-import { collectible } from './art.js?v=14';
-import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=14';
+import { gifts, giftImage } from './gifts.js?v=15';
+import { icon } from './icons.js?v=15';
+import { icon3d } from './icons3d.js?v=15';
+import {nftArt} from './nft-art.js?v=15';
+import { PALETTES, readPalette, savePalette, tonesFor, readView, saveView } from './themes.js?v=15';
+import { collectible } from './art.js?v=15';
+import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=15';
 
 const GOLD = new URL('../assets/collectible-trio.png', import.meta.url).href;
 const BUNNY = giftImage('heart-locket');
