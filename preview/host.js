@@ -1,4 +1,4 @@
-import {missionCatalog} from './catalog.js?v=12';
+import {missionCatalog} from './catalog.js?v=13';
 export function createPreviewHost() {
   const now = Date.now();
   const until = hours => new Date(now + hours * 3600000).toISOString();

@@ -1,6 +1,8 @@
 const paths = {
     wallet:'<path d="M4 6h15v14H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h13v2M15 10h6v6h-6z"/><path d="M18 13h.01"/>',
     arrow:'<path d="M5 12h14m-5-5 5 5-5 5"/>',
+    lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><path d="M12 15v2"/>',
+    compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
     chevron:'<path d="m9 5 7 7-7 7"/>',
     info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.2"/>',
     close:'<path d="m6 6 12 12M6 18 18 6"/>',

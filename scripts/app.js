@@ -1,10 +1,10 @@
-import { gifts, giftImage } from './gifts.js?v=12';
-import { icon } from './icons.js?v=12';
-import { icon3d } from './icons3d.js?v=12';
-import {nftArt} from './nft-art.js?v=12';
-import { PALETTES, readPalette, savePalette, tonesFor } from './themes.js?v=12';
-import { collectible } from './art.js?v=12';
-import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=12';
+import { gifts, giftImage } from './gifts.js?v=13';
+import { icon } from './icons.js?v=13';
+import { icon3d } from './icons3d.js?v=13';
+import {nftArt} from './nft-art.js?v=13';
+import { PALETTES, readPalette, savePalette, tonesFor, readView, saveView } from './themes.js?v=13';
+import { collectible } from './art.js?v=13';
+import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=13';
 
 const GOLD = new URL('../assets/collectible-trio.png', import.meta.url).href;
 const BUNNY = giftImage('heart-locket');
@@ -32,7 +32,7 @@ class RewardsApp {
     this.busy = new Set(); this.keys = new ClaimKeys(); this.life = new AbortController();
     this.destroyed = false; this.loading = false; this.pendingLoad = null; this.lastLoad = 0;
     this.anchor = performance.now(); this.serverNow = Date.now(); this.focusBefore = null; this.activeTask = null;
-    this.generation = 0; this.requests = new Set(); this.palette = readPalette(); this.tones = tonesFor(this.palette);
+    this.generation = 0; this.requests = new Set(); this.palette = readPalette(); this.tones = tonesFor(this.palette); this.view = readView();
   }
   now() { return this.serverNow + performance.now() - this.anchor; }
   items() { return this.data ? [...this.data.tasks, ...this.data.achievements] : []; }
@@ -95,6 +95,7 @@ class RewardsApp {
     window.addEventListener('online', () => this.load(), {signal:this.life.signal});
     this.root.querySelector('.gift-viewport')?.addEventListener('pointerdown',()=>{this.root.querySelector('.gift-ticker').classList.add('is-paused');const b=this.root.querySelector('[data-action=ticker]');b.setAttribute('aria-pressed','true');b.setAttribute('aria-label','Resume gift carousel');b.querySelector('small').textContent='PLAY';},{signal:this.life.signal});
     this.timer = setInterval(() => this.updateClocks(), 1000);
+    this.sizer = new ResizeObserver(() => this.drawRoad()); this.sizer.observe(this.root);
     this.attachSubscription(); this.load();
   }
   attachSubscription() {
@@ -145,7 +146,7 @@ class RewardsApp {
     this.root.querySelector('#balance-value').innerHTML=`${rewardText(this.data.balance)} <span>${esc(this.data.balance?.unit||'TON')}</span>`;
     this.root.querySelector('#task-count').textContent=this.data.tasks.filter(t=>!COMPLETE.has(t.state)&&t.state!=='expired').length;
     this.content.innerHTML=this.tab==='tasks'?this.tasksView():this.achievementsView();
-    this.content.setAttribute('aria-busy','false');this.updateClocks();
+    this.content.setAttribute('aria-busy','false');this.updateClocks();this.drawRoad();
     if(focusId)this.root.querySelector(`[data-task-action="${CSS.escape(focusId)}"]`)?.focus({preventScroll:true});
     else if(focusAction==='filter')this.root.querySelector(`[data-filter="${this.filter}"]`)?.focus({preventScroll:true});
     if(this.activeTask&&this.dialog.open)this.taskSheet(this.activeTask,true);
@@ -154,11 +155,59 @@ class RewardsApp {
     const ready=this.data.tasks.filter(t=>t.state==='verified'&&t.canClaim).length;
     const daily=this.data.tasks.filter(t=>t.category==='daily');
     const completed=daily.filter(t=>COMPLETE.has(t.state)).length;
-    return `${this.connectionError?'<div class="sync-warning" role="status">Showing your last confirmed progress. <button data-action="refresh">Refresh</button></div>':''}
+    const switcher=`<div class="view-switch" role="group" aria-label="Task view"><button data-action="view" data-view="list" aria-pressed="${this.view==='list'}">${icon('grid')}<span>List</span></button><button data-action="view" data-view="map" aria-pressed="${this.view==='map'}">${icon('compass')}<span>Map</span></button></div>`;
+    if(this.view==='map')return `${this.connectionError?'<div class="sync-warning" role="status">Showing your last confirmed progress. <button data-action="refresh">Refresh</button></div>':''}${switcher}${this.roadView()}`;
+    return `${this.connectionError?'<div class="sync-warning" role="status">Showing your last confirmed progress. <button data-action="refresh">Refresh</button></div>':''}${switcher}
       <div class="journey${completed&&completed===daily.length?' journey-full':''}"><span class="journey-icon">${boltArt()}</span><div class="journey-copy"><strong>Your daily journey</strong><small>${completed} of ${daily.length} rewards collected</small></div><div class="journey-meter"><div class="journey-dots" aria-label="${completed} of ${daily.length} daily tasks claimed">${daily.slice(0,12).map(t=>`<span class="${COMPLETE.has(t.state)?'done':''}">${COMPLETE.has(t.state)?icon('check'):''}</span>`).join('')}</div><span class="journey-pct">${daily.length?Math.round(completed/daily.length*100):0}%</span></div></div>
       <div class="filter-bar" role="group" aria-label="Filter tasks">${[['all','All','grid'],['daily','Daily','sun'],['limited','Limited','crown'],['social','Social','users']].map(([id,label,art])=>{const open=this.data.tasks.filter(t=>(id==='all'||t.category===id)&&!COMPLETE.has(t.state)&&t.state!=='expired').length;return `<button data-action="filter" data-filter="${id}" aria-pressed="${this.filter===id}"><i class="chip-art">${icon3d(art,'',this.tones[id])}</i><span class="chip-label">${label}</span>${open?`<span class="chip-count">${open}</span>`:''}</button>`;}).join('')}</div>
       <div id="task-groups">${['daily','limited','social'].filter(c=>this.filter==='all'||this.filter===c).map(c=>this.group(c)).join('')||this.empty('No tasks here yet','New things to do will appear here.')}</div>
       <button class="discovery-banner" data-action="achievements"><span class="discovery-art">${nftArt('crown')}</span><span><small>GO A LITTLE FURTHER</small><strong>Some things are worth unlocking.</strong><span>Discover your achievements ${icon('arrow')}</span></span></button>`;
+  }
+  roadView() {
+    const order=['daily','social','limited'];
+    const tasks=order.flatMap(c=>this.data.tasks.filter(t=>t.category===c).map(t=>this.item(t.id)));
+    if(!tasks.length)return this.empty('No tasks here yet','New things to do will appear here.');
+    const milestones=this.data.achievements.map(a=>this.item(a.id)).filter(Boolean);
+    const prize=milestones.length?milestones[milestones.length-1]:null;
+    const checkpoints=milestones.slice(0,-1);
+    const first=tasks.findIndex(t=>!COMPLETE.has(t.state)&&t.state!=='expired');
+    const doneCount=tasks.filter(t=>COMPLETE.has(t.state)).length;
+    const zone={daily:['Daily','sun'],social:['Social','users'],limited:['Limited','crown']};
+    const rows=[];
+    tasks.forEach((t,i)=>{
+      if(i===0||tasks[i-1].category!==t.category)rows.push({kind:'zone',category:t.category,label:zone[t.category][0],art:zone[t.category][1]});
+      const state=COMPLETE.has(t.state)?'done':i===first?'current':first<0||i<first?'done':'ahead';
+      rows.push({kind:'task',task:t,state});
+      checkpoints.forEach((m,k)=>{if(i===Math.round((k+1)*tasks.length/(checkpoints.length+1))-1)rows.push({kind:'checkpoint',milestone:m});});
+    });
+    const xs=[26,72,30,76,22,70];
+    let n=0;
+    const stepHTML=rows.map(r=>{
+      if(r.kind==='zone')return `<div class="road-zone road-zone-${esc(r.category)}"><span class="road-sign">${icon3d(r.art,'',this.tones[r.category])}<b>${r.label}</b></span></div>`;
+      if(r.kind==='checkpoint'){const m=r.milestone,done=COMPLETE.has(m.state);return `<div class="road-check ${done?'is-done':''}"><button class="road-island" data-details="${esc(m.id)}" aria-label="Checkpoint: ${esc(m.title)}"><span class="island-top"></span><span class="island-glow"></span><span class="island-art">${taskGift(m.icon)}</span></button><span class="road-node road-node-check" data-road>${done?icon('check'):icon('gift')}</span><button class="road-card road-card-check" data-details="${esc(m.id)}"><span class="road-card-body"><small>CHECKPOINT · ${m.progress}/${m.target}</small><strong>${esc(m.title)}</strong><span>${esc(m.description)}</span></span><span class="road-card-end">${done?icon('check'):icon('arrow')}</span></button></div>`;}
+      const t=r.task,x=xs[n%xs.length],side=n%2?'right':'left';n++;
+      const action=taskAction(t,this.now()),ready=t.state==='verified'&&t.canClaim;
+      const status=r.state==='done'?'Completed':ready?'Ready to claim':r.state==='current'?(['available','in_progress'].includes(t.state)?`${t.progress}/${t.target} · up next`:LABELS[t.state]):'Coming up';
+      return `<div class="road-step road-${r.state} side-${side}" style="--x:${x}%"><span class="road-node ${ready?'is-ready':''}" data-road>${r.state==='done'?icon('check'):r.state==='ahead'?icon('lock'):`<i class="node-art">${taskGift(t.icon)}</i>`}</span><button class="road-card" data-details="${esc(t.id)}"><span class="road-card-art">${taskGift(t.icon)}</span><span class="road-card-body"><strong>${esc(t.title)}</strong><small>${icon3d('ton')}+${rewardText(t.reward)} ${esc(t.reward.unit)}</small><em class="road-status">${status}</em></span><span class="road-card-end">${r.state==='done'?icon('check'):r.state==='ahead'?icon('lock'):icon('arrow')}</span></button>${(r.state==='current'||ready)&&!action.disabled?`<button class="${ready?'claim-btn':'task-btn'} road-cta" data-task-action="${esc(t.id)}">${icon(ready?'gift':action.kind==='navigate'?'arrow':'check-circle')}<span>${action.label}</span></button>`:''}</div>`;
+    }).reverse().join('');
+    return `<section class="road" aria-label="Your task map" style="--done:${tasks.length?doneCount/tasks.length:0}">
+      <svg class="road-svg" aria-hidden="true"><path class="road-shadow" transform="translate(0 7)"></path><path class="road-base"></path><path class="road-inner"></path><path class="road-halo"></path><path class="road-line"></path><path class="road-dash"></path></svg>
+      <div class="road-summit">${prize?`<button class="road-island road-island-prize" data-details="${esc(prize.id)}" aria-label="Main prize: ${esc(prize.title)}"><span class="island-top"></span><span class="island-glow"></span><span class="island-art">${taskGift(prize.icon)}</span></button><span class="road-node road-node-prize" data-road>${icon3d('crown','','gold')}</span><button class="road-card road-card-prize" data-details="${esc(prize.id)}"><span class="road-card-body"><small>MAIN PRIZE · ${prize.progress}/${prize.target}</small><strong>${esc(prize.title)}</strong><span>${esc(prize.description)}</span></span><span class="road-card-end">${icon('arrow')}</span></button>`:''}</div>
+      ${stepHTML}
+      <div class="road-start"><span class="road-node road-node-start" data-road></span><span class="road-pad"><b>START</b><small>${doneCount} of ${tasks.length} done</small></span></div>
+    </section>`;
+  }
+  drawRoad() {
+    const road=this.root?.querySelector('.road');if(!road)return;
+    const svg=road.querySelector('.road-svg'),box=road.getBoundingClientRect();
+    const nodes=[...road.querySelectorAll('[data-road]')].reverse();
+    if(nodes.length<2||!box.width)return;
+    const pts=nodes.map(el=>{const r=el.getBoundingClientRect();return [r.left-box.left+r.width/2,r.top-box.top+r.height/2];});
+    let d=`M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+    for(let i=1;i<pts.length;i++){const [x0,y0]=pts[i-1],[x1,y1]=pts[i],dy=(y1-y0)*.55;d+=` C${x0.toFixed(1)} ${(y0+dy).toFixed(1)} ${x1.toFixed(1)} ${(y1-dy).toFixed(1)} ${x1.toFixed(1)} ${y1.toFixed(1)}`;}
+    svg.setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);svg.setAttribute('width',box.width);svg.setAttribute('height',box.height);
+    const done=Math.max(0,Math.min(100,parseFloat(getComputedStyle(road).getPropertyValue('--done'))*100||0));
+    svg.querySelectorAll('path').forEach(p=>{p.setAttribute('d',d);p.setAttribute('pathLength','100');if(p.classList.contains('road-line')||p.classList.contains('road-halo'))p.style.strokeDasharray=`${done} 100`;});
   }
   group(category) {
     const tasks=this.data.tasks.filter(t=>t.category===category);
@@ -300,6 +349,7 @@ class RewardsApp {
       case 'close':this.dialog.close();break;
       case 'refresh':this.load();break;
       case 'filter':this.filter=button.dataset.filter;this.render();break;
+      case 'view':this.view=saveView(button.dataset.view);this.render();break;
       case 'explore':this.root.querySelector('.filter-bar, .public-missions, .state-panel')?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});break;
       case 'achievements':this.selectTab('achievements');this.root.querySelector('.main-tabs').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});this.root.querySelector('#tab-achievements').focus({preventScroll:true});break;
       case 'balance':this.activeTask=null;this.showSheet(`<div class="detail-art">${taskGift('gem')}</div><span class="detail-eyebrow">YOUR REWARDS</span><h2 id="sheet-title">${rewardText(this.data?.balance)} <small>${esc(this.data?.balance?.unit||'TON')}</small></h2><p>${this.data?'Your latest balance from CASE. Rewards appear here after a successful claim.':'Connect through CASE to see your current balance.'}</p>${this.review?'<p class="inline-message">Sample balance for design review. No real account is connected.</p>':''}<button class="primary-btn full-width" data-action="close">Keep exploring ${icon('arrow')}</button>`);break;
@@ -308,5 +358,5 @@ class RewardsApp {
     }
   }
   toast(message) {if(this.destroyed)return;const el=this.root.querySelector('.toast');el.textContent=message;el.classList.add('visible');clearTimeout(this.toastTimer);this.toastTimer=setTimeout(()=>el.classList.remove('visible'),4000);}
-  destroy() {this.destroyed=true;this.life.abort();clearInterval(this.timer);clearTimeout(this.toastTimer);clearTimeout(this.refreshTimer);this.unsubscribe?.();this.dialog?.close();this.root.replaceChildren();}
+  destroy() {this.destroyed=true;this.life.abort();clearInterval(this.timer);clearTimeout(this.toastTimer);clearTimeout(this.refreshTimer);this.sizer?.disconnect();this.unsubscribe?.();this.dialog?.close();this.root.replaceChildren();}
 }

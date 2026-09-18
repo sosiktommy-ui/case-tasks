@@ -1,0 +1,86 @@
+.view-switch{display:flex;gap:4px;margin:16px 0 0;padding:4px;background:linear-gradient(#232323,#1b1b1b);border:1px solid #363636;border-radius:14px;box-shadow:inset 0 1px #ffffff0d,0 3px 0 #0a0a0a}
+.view-switch button{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px;border:0;border-radius:10px;background:transparent;color:#a3a9b1;font:inherit;font-size:12px;font-weight:700;letter-spacing:.3px;cursor:pointer;transition:background .2s,color .2s}
+.view-switch button svg{width:16px;height:16px}
+.view-switch button[aria-pressed=true]{background:linear-gradient(#4cc4ff,#0b7be0);color:#fff;box-shadow:inset 0 1px #ffffff55,0 3px 0 #05477f,0 6px 14px #0b7be066}
+.road{--blue:#46c2ff;--blue-deep:#0b7be0;--green:#4fdc8f;--green-deep:#1f9a5a;--gold:#ffd24a;--gold-deep:#c98a10;position:relative;margin:16px 0 8px;padding:18px 10px 24px;border-radius:24px;border:1px solid #2a3540;background:radial-gradient(ellipse at 50% 0,#12354f 0,transparent 55%),radial-gradient(ellipse at 15% 60%,#0f2436 0,transparent 45%),radial-gradient(ellipse at 90% 80%,#1a1f3a 0,transparent 50%),#101418;box-shadow:inset 0 1px #ffffff10,0 12px 30px #0008;overflow:hidden;isolation:isolate}
+.road:before{content:"";position:absolute;inset:0;background:radial-gradient(#ffffff1c 1px,transparent 1.5px) 0 0/34px 34px,radial-gradient(#ffffff10 1px,transparent 1.5px) 17px 21px/46px 46px;mask-image:linear-gradient(#000 40%,#0006);pointer-events:none}
+.road-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+.road-svg path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.road-shadow{stroke:#090c10;stroke-width:24;opacity:.9}
+.road-base{stroke:#2b3744;stroke-width:22}
+.road-inner{stroke:#3b4957;stroke-width:14}
+.road-halo{stroke:var(--blue);stroke-width:26;opacity:.22}
+.road-line{stroke:var(--blue);stroke-width:8}
+.road-dash{stroke:#dbe6f0;stroke-width:2.4;stroke-dasharray:.55 1.9;opacity:.75;animation:road-march 2.4s linear infinite}
+@keyframes road-march{to{stroke-dashoffset:-4.9}}
+.road-summit,.road-step,.road-check,.road-start,.road-zone{position:relative;z-index:1}
+.road-node{position:absolute;left:var(--x,50%);top:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#9aa7b5;background:radial-gradient(circle at 35% 28%,#3d4855,#1b2027 72%);border:3px solid #4a5665;box-shadow:inset 0 2px 0 #ffffff2a,inset 0 -3px 0 #0006,0 5px 0 #0a0d11,0 12px 20px #0008;z-index:2}
+.road-node svg{width:20px;height:20px}
+.road-node .node-art{position:absolute;inset:4px;display:block}
+.road-node .node-art .nft-art{width:100%;height:100%}
+.road-node .node-art .nft-item{filter:drop-shadow(0 4px 3px #0008)}
+.road-done .road-node{color:#fff;background:radial-gradient(circle at 35% 28%,#7cf0b0,#22a463 70%);border-color:#9cf7c6;box-shadow:inset 0 2px 0 #ffffff55,inset 0 -3px 0 #0005,0 5px 0 #0d5c37,0 12px 22px #1f9a5a55}
+.road-current .road-node{width:66px;height:66px;background:radial-gradient(circle at 35% 28%,#2a3f52,#131a22 72%);border-color:var(--blue);box-shadow:inset 0 2px 0 #ffffff2a,0 6px 0 #05477f,0 0 0 6px #46c2ff2e,0 14px 26px #0b7be066;animation:road-pulse 1.8s ease-in-out infinite}
+.road-node.is-ready{border-color:var(--gold);box-shadow:inset 0 2px 0 #ffffff2a,0 6px 0 #7a5306,0 0 0 6px #ffd24a2e,0 14px 26px #ffd24a55;animation:none}
+@keyframes road-pulse{0%,100%{box-shadow:inset 0 2px 0 #ffffff2a,0 6px 0 #05477f,0 0 0 6px #46c2ff2e,0 14px 26px #0b7be066}50%{box-shadow:inset 0 2px 0 #ffffff2a,0 6px 0 #05477f,0 0 0 14px #46c2ff10,0 14px 26px #0b7be066}}
+.road-ahead .road-node{color:#6b7683;background:radial-gradient(circle at 35% 28%,#2a313a,#171c22 72%);border-color:#333b45;box-shadow:inset 0 2px 0 #ffffff12,0 5px 0 #090b0e,0 10px 18px #0007}
+.road-step{min-height:118px;margin:2px 0;display:flex;flex-direction:column;justify-content:center}
+.road-step.side-left .road-card,.road-step.side-left .road-cta{margin-left:auto}
+.road-step.side-right .road-card,.road-step.side-right .road-cta{margin-right:auto}
+.road-card{display:flex;align-items:center;gap:10px;width:57%;padding:10px 10px 10px 11px;border:1px solid #3a424c;border-radius:16px;background:linear-gradient(160deg,#2a2f36,#1c2026);color:inherit;font:inherit;text-align:left;cursor:pointer;box-shadow:inset 0 1px #ffffff16,0 4px 0 #0c0f13,0 10px 20px #0007;transition:transform .2s,border-color .2s}
+.road-card:hover{transform:translateY(-1px);border-color:#4f5a66}
+.road-card-art{flex:none;width:46px;height:46px;display:block}
+.road-card-art .nft-art{width:100%;height:100%}
+.road-card-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.road-card-body strong{font-size:12.5px;line-height:1.2;letter-spacing:-.2px;color:#f6f7f9}
+.road-card-body small{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#cfd6de}
+.road-card-body small .i3d{width:13px;height:13px}
+.road-card-body span{font-size:10.5px;line-height:1.35;color:#a3aab3}
+.road-status{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.3px;color:#8ed8ff}
+.road-card-end{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#161a1f;border:1px solid #3a424c;color:#cfd6de}
+.road-card-end svg{width:13px;height:13px}
+.road-done .road-card{background:linear-gradient(160deg,#242b28,#1a201d);border-color:#2f4d3d}
+.road-done .road-status{color:#7cf0b0}
+.road-done .road-card-end{background:#1f9a5a;border-color:#7cf0b0;color:#fff}
+.road-current .road-card{border-color:var(--blue);background:linear-gradient(160deg,#243441,#1b242d);box-shadow:inset 0 1px #ffffff20,0 4px 0 #0c0f13,0 0 0 1px #46c2ff33,0 12px 26px #0b7be04d}
+.road-current .road-card-end{background:linear-gradient(#4cc4ff,#0b7be0);border-color:#7fd6ff;color:#fff}
+.road-ahead .road-card{opacity:.62;filter:saturate(.6)}
+.road-ahead .road-status{color:#7d8792}
+.road-cta{width:57%;margin-top:8px;justify-content:center}
+.road-zone{display:flex;justify-content:center;margin:14px 0 2px}
+.road-sign{display:inline-flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:999px;background:linear-gradient(#2a3038,#1b2026);border:1px solid #3d4650;box-shadow:inset 0 1px #ffffff18,0 4px 0 #0a0d11,0 8px 16px #0007;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#dfe5ec}
+.road-sign .i3d{width:24px;height:24px}
+.road-island{position:relative;display:block;width:164px;height:132px;margin:0 auto;border:0;background:none;padding:0;cursor:pointer}
+.island-top{position:absolute;left:0;right:0;bottom:8px;height:66px;border-radius:50%;background:radial-gradient(ellipse at 50% 28%,#55697d,#2b3742 62%,#1e262e);box-shadow:inset 0 3px 0 #ffffff33,inset 0 -8px 14px #0008,0 12px 0 #182029,0 18px 0 #0e1319,0 22px 0 #080a0d,0 34px 32px #000b}
+.island-top:before{content:"";position:absolute;inset:5px 12px auto;height:30px;border-radius:50%;background:radial-gradient(ellipse at 50% 30%,#8fa4b8,transparent 68%);opacity:.55}
+.island-top:after{content:"";position:absolute;left:14px;right:14px;top:60%;height:14px;border-radius:50%;background:radial-gradient(ellipse,#46c2ff55,transparent 70%);filter:blur(4px)}
+.island-glow{position:absolute;left:10%;right:10%;bottom:-12px;height:36px;border-radius:50%;background:radial-gradient(ellipse,#46c2ff66,transparent 68%);filter:blur(8px)}
+.island-art{position:absolute;left:50%;bottom:34px;width:110px;height:110px;transform:translateX(-50%);display:block;animation:road-float 5s ease-in-out infinite}
+.island-art .nft-art{width:100%;height:100%}
+.island-art .nft-item{filter:drop-shadow(0 16px 10px #000a)}
+@keyframes road-float{0%,100%{transform:translateX(-50%) translateY(0) rotate(-2deg)}50%{transform:translateX(-50%) translateY(-8px) rotate(2deg)}}
+.road-check{min-height:230px;margin:6px 0;padding-top:6px}
+.road-check .road-node{position:relative;left:auto;top:auto;transform:none;margin:-16px auto 0;color:#ffd24a;background:radial-gradient(circle at 35% 28%,#3b3421,#1c1a12 72%);border-color:#8a6a1c;box-shadow:inset 0 2px 0 #ffffff2a,0 5px 0 #3d2c07,0 0 0 6px #ffd24a1f,0 12px 22px #0008}
+.road-check.is-done .road-node{color:#fff;background:radial-gradient(circle at 35% 28%,#7cf0b0,#22a463 70%);border-color:#9cf7c6;box-shadow:inset 0 2px 0 #ffffff55,0 5px 0 #0d5c37,0 12px 22px #1f9a5a55}
+.road-card-check,.road-card-prize{width:100%;margin-top:12px;border-color:#7a5f1c;background:linear-gradient(160deg,#2d2a1e,#1d1b14);box-shadow:inset 0 1px #ffffff18,0 4px 0 #0c0f13,0 0 0 1px #ffd24a2a,0 12px 26px #0009}
+.road-card-check small,.road-card-prize small{color:var(--gold);font-size:9.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase}
+.road-card-check strong,.road-card-prize strong{font-size:14px}
+.road-card-check .road-card-end,.road-card-prize .road-card-end{background:linear-gradient(#ffd24a,#c98a10);border-color:#ffe38a;color:#3a2600}
+.road-check.is-done .road-card-check{border-color:#2f4d3d}
+.road-check.is-done .road-card-check small{color:#7cf0b0}
+.road-check.is-done .road-card-check .road-card-end{background:#1f9a5a;border-color:#7cf0b0;color:#fff}
+.road-summit{min-height:250px;padding-top:12px}
+.road-island-prize{width:196px;height:156px}
+.road-island-prize .island-top{height:78px;background:radial-gradient(ellipse at 50% 30%,#4a4a3a,#2a2a22 68%,#1c1c16);box-shadow:inset 0 3px 0 #ffffff2a,inset 0 -6px 12px #0007,0 16px 0 #15150f,0 21px 0 #0b0b08,0 34px 34px #000a}
+.road-island-prize .island-top:after{background:radial-gradient(ellipse,#ffd24a66,transparent 70%)}
+.road-island-prize .island-glow{background:radial-gradient(ellipse,#ffd24a77,transparent 68%)}
+.road-island-prize .island-art{width:128px;height:128px;bottom:44px}
+.road-node-prize{position:relative;left:auto;top:auto;transform:none;margin:-18px auto 0;width:54px;height:54px;color:#fff;background:radial-gradient(circle at 35% 28%,#ffe38a,#c98a10 72%);border-color:#ffe9a6;box-shadow:inset 0 2px 0 #ffffff66,inset 0 -3px 0 #0004,0 6px 0 #7a5306,0 0 0 7px #ffd24a22,0 14px 26px #ffd24a55}
+.road-node-prize .i3d{width:30px;height:30px}
+.road-start{min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding-top:14px}
+.road-node-start{position:relative;left:auto;top:auto;transform:none;width:78px;height:30px;border-radius:50%;background:radial-gradient(ellipse at 50% 40%,#7fd6ff,#0b7be0 70%);border:3px solid #a7e3ff;box-shadow:inset 0 2px 0 #ffffff66,0 6px 0 #05477f,0 0 0 8px #46c2ff22,0 0 30px #46c2ff88}
+.road-pad{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 22px;border-radius:14px;background:linear-gradient(#2a3038,#1b2026);border:1px solid #3d4650;box-shadow:inset 0 1px #ffffff18,0 4px 0 #0a0d11,0 8px 16px #0007}
+.road-pad b{font-size:13px;letter-spacing:3px;color:#fff}
+.road-pad small{font-size:10px;color:#a3aab3}
+@media(max-width:380px){.road{padding:14px 6px 20px}.road-card,.road-cta{width:60%}.road-card{padding:9px 8px 9px 9px;gap:8px}.road-card-art{width:40px;height:40px}.road-card-body strong{font-size:12px}.road-node{width:42px;height:42px}.road-current .road-node{width:58px;height:58px}.road-island{width:150px;height:122px}.island-art{width:98px;height:98px}}
+@media(prefers-reduced-motion:reduce){.road-dash,.road-current .road-node,.island-art{animation:none!important}}

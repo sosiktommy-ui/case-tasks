@@ -6,3 +6,6 @@ const KEY='case:palette';
 export function readPalette(){try {const id=localStorage.getItem(KEY);return PALETTES.some(p=>p.id===id)?id:'case';}catch{return 'case';}}
 export function savePalette(id){if(!PALETTES.some(p=>p.id===id))return 'case';try{localStorage.setItem(KEY,id);}catch{}return id;}
 export function tonesFor(id){return (PALETTES.find(p=>p.id===id)||PALETTES[0]).tones;}
+const VIEW='case:view';
+export function readView(){try{return localStorage.getItem(VIEW)==='map'?'map':'list';}catch{return 'list';}}
+export function saveView(id){const v=id==='map'?'map':'list';try{localStorage.setItem(VIEW,v);}catch{}return v;}

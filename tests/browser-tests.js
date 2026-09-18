@@ -3,6 +3,7 @@ import { validateSnapshot, validateOperation, taskAction, rewardText, remaining 
 import { createPreviewHost } from '../preview/host.js';
 
 export async function runTests() {
+  try{localStorage.setItem('case:view','list');}catch{}
   const results=[];
   const assert=(condition,message)=>{if(!condition)throw new Error(message);};
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
