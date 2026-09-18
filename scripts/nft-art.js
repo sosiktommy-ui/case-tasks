@@ -1,4 +1,4 @@
-import {giftImage} from './gifts.js?v=13';
+import {giftImage} from './gifts.js?v=14';
 const reference={bear:0,duck:1,backpack:2,lamp:3,ghost:4,witch:5,champion:6,fighter:7};
 const sets={
  bear:['ref:bear'],duck:['ref:duck'],backpack:['ref:backpack'],lamp:['ref:lamp'],ghost:['ref:ghost'],witch:['ref:witch'],fighters:['ref:champion','ref:fighter'],bunny:['jelly-bunny'],cat:['scared-cat'],helmet:['neko-helmet'],genie:['genie-lamp'],spooky:['scared-cat','ref:ghost'],golden:['swiss-watch','ref:backpack'],friends:['ref:bear','plush-pepe'],

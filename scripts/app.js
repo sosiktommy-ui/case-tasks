@@ -1,14 +1,19 @@
-import { gifts, giftImage } from './gifts.js?v=13';
-import { icon } from './icons.js?v=13';
-import { icon3d } from './icons3d.js?v=13';
-import {nftArt} from './nft-art.js?v=13';
-import { PALETTES, readPalette, savePalette, tonesFor, readView, saveView } from './themes.js?v=13';
-import { collectible } from './art.js?v=13';
-import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=13';
+import { gifts, giftImage } from './gifts.js?v=14';
+import { icon } from './icons.js?v=14';
+import { icon3d } from './icons3d.js?v=14';
+import {nftArt} from './nft-art.js?v=14';
+import { PALETTES, readPalette, savePalette, tonesFor, readView, saveView } from './themes.js?v=14';
+import { collectible } from './art.js?v=14';
+import { COMPLETE, ClaimKeys, escapeHTML as esc, rewardText, remaining, taskAction, validateHost, validateSnapshot, validateOperation } from './model.js?v=14';
 
 const GOLD = new URL('../assets/collectible-trio.png', import.meta.url).href;
 const BUNNY = giftImage('heart-locket');
 const taskGift = kind => nftArt(kind);
+const taskMark = (task,index) => {
+  const route={channel:'send',invite:'users',collection:'star',profile:'gem',wheel:'wheel',cases:'grid',craft:'craft',home:'rocket',weekly:'sun',upgrade:'bolt',leaderboard:'trophy',rewards:'check'};
+  const art=route[task.route]||(['send','users','grid','star','rocket','check'][index%6]);
+  return icon3d(art,'road-task-icon');
+};
 const FAVICON = new URL('../assets/favicon-v2.svg', import.meta.url).href;
 const boltArt = () => icon3d('bolt','art3d');
 const LABELS = {
@@ -180,27 +185,27 @@ class RewardsApp {
       rows.push({kind:'task',task:t,state});
       checkpoints.forEach((m,k)=>{if(i===Math.round((k+1)*tasks.length/(checkpoints.length+1))-1)rows.push({kind:'checkpoint',milestone:m});});
     });
-    const xs=[26,72,30,76,22,70];
+    const xs=[30,72,26,75,32,68];
     let n=0;
     const stepHTML=rows.map(r=>{
-      if(r.kind==='zone')return `<div class="road-zone road-zone-${esc(r.category)}"><span class="road-sign">${icon3d(r.art,'',this.tones[r.category])}<b>${r.label}</b></span></div>`;
-      if(r.kind==='checkpoint'){const m=r.milestone,done=COMPLETE.has(m.state);return `<div class="road-check ${done?'is-done':''}"><button class="road-island" data-details="${esc(m.id)}" aria-label="Checkpoint: ${esc(m.title)}"><span class="island-top"></span><span class="island-glow"></span><span class="island-art">${taskGift(m.icon)}</span></button><span class="road-node road-node-check" data-road>${done?icon('check'):icon('gift')}</span><button class="road-card road-card-check" data-details="${esc(m.id)}"><span class="road-card-body"><small>CHECKPOINT · ${m.progress}/${m.target}</small><strong>${esc(m.title)}</strong><span>${esc(m.description)}</span></span><span class="road-card-end">${done?icon('check'):icon('arrow')}</span></button></div>`;}
+      if(r.kind==='zone')return `<div class="road-zone road-zone-${esc(r.category)}"><span class="road-sign">${icon3d(r.art,'',this.tones[r.category])}<span><small>MISSION ZONE</small><b>${r.label}</b></span></span></div>`;
+      if(r.kind==='checkpoint'){const m=r.milestone,done=COMPLETE.has(m.state);return `<div class="road-check ${done?'is-done':''}"><button class="road-island" data-details="${esc(m.id)}" aria-label="Checkpoint: ${esc(m.title)}"><span class="island-top"></span><span class="island-glow"></span><span class="island-art island-box">${icon3d('gift','road-box-icon','gold')}</span></button><span class="road-node road-node-check" data-road>${done?icon('check'):icon('gift')}</span><button class="road-card road-card-check" data-details="${esc(m.id)}"><span class="road-card-body"><small>CHECKPOINT · ${m.progress}/${m.target}</small><strong>${esc(m.title)}</strong><span>Reach this milestone to unlock the bonus box.</span></span><span class="road-card-end">${done?icon('check'):icon('arrow')}</span></button></div>`;}
       const t=r.task,x=xs[n%xs.length],side=n%2?'right':'left';n++;
       const action=taskAction(t,this.now()),ready=t.state==='verified'&&t.canClaim;
       const status=r.state==='done'?'Completed':ready?'Ready to claim':r.state==='current'?(['available','in_progress'].includes(t.state)?`${t.progress}/${t.target} · up next`:LABELS[t.state]):'Coming up';
-      return `<div class="road-step road-${r.state} side-${side}" style="--x:${x}%"><span class="road-node ${ready?'is-ready':''}" data-road>${r.state==='done'?icon('check'):r.state==='ahead'?icon('lock'):`<i class="node-art">${taskGift(t.icon)}</i>`}</span><button class="road-card" data-details="${esc(t.id)}"><span class="road-card-art">${taskGift(t.icon)}</span><span class="road-card-body"><strong>${esc(t.title)}</strong><small>${icon3d('ton')}+${rewardText(t.reward)} ${esc(t.reward.unit)}</small><em class="road-status">${status}</em></span><span class="road-card-end">${r.state==='done'?icon('check'):r.state==='ahead'?icon('lock'):icon('arrow')}</span></button>${(r.state==='current'||ready)&&!action.disabled?`<button class="${ready?'claim-btn':'task-btn'} road-cta" data-task-action="${esc(t.id)}">${icon(ready?'gift':action.kind==='navigate'?'arrow':'check-circle')}<span>${action.label}</span></button>`:''}</div>`;
-    }).reverse().join('');
+      return `<div class="road-step road-${r.state} side-${side} road-tone-${(n-1)%6}" style="--x:${x}%"><span class="road-node ${ready?'is-ready':''}" data-road>${r.state==='done'?icon('check'):r.state==='ahead'?icon('lock'):`<b>${n}</b>`}</span><button class="road-card" data-details="${esc(t.id)}"><span class="road-card-art">${taskMark(t,n-1)}</span><span class="road-card-body"><strong>${esc(t.title)}</strong><small>${icon3d('ton')}+${rewardText(t.reward)} ${esc(t.reward.unit)}</small><em class="road-status">${status}</em></span><span class="road-card-end">${r.state==='done'?icon('check'):r.state==='ahead'?icon('lock'):icon('arrow')}</span></button>${(r.state==='current'||ready)&&!action.disabled?`<button class="${ready?'claim-btn':'task-btn'} road-cta" data-task-action="${esc(t.id)}">${icon(ready?'gift':action.kind==='navigate'?'arrow':'check-circle')}<span>${action.label}</span></button>`:''}</div>`;
+    }).join('');
     return `<section class="road" aria-label="Your task map" style="--done:${tasks.length?doneCount/tasks.length:0}">
       <svg class="road-svg" aria-hidden="true"><path class="road-shadow" transform="translate(0 7)"></path><path class="road-base"></path><path class="road-inner"></path><path class="road-halo"></path><path class="road-line"></path><path class="road-dash"></path></svg>
-      <div class="road-summit">${prize?`<button class="road-island road-island-prize" data-details="${esc(prize.id)}" aria-label="Main prize: ${esc(prize.title)}"><span class="island-top"></span><span class="island-glow"></span><span class="island-art">${taskGift(prize.icon)}</span></button><span class="road-node road-node-prize" data-road>${icon3d('crown','','gold')}</span><button class="road-card road-card-prize" data-details="${esc(prize.id)}"><span class="road-card-body"><small>MAIN PRIZE · ${prize.progress}/${prize.target}</small><strong>${esc(prize.title)}</strong><span>${esc(prize.description)}</span></span><span class="road-card-end">${icon('arrow')}</span></button>`:''}</div>
-      ${stepHTML}
       <div class="road-start"><span class="road-node road-node-start" data-road></span><span class="road-pad"><b>START</b><small>${doneCount} of ${tasks.length} done</small></span></div>
+      ${stepHTML}
+      <div class="road-summit">${prize?`<button class="road-island road-island-prize" data-details="${esc(prize.id)}" aria-label="Main prize: ${esc(prize.title)}"><span class="island-top"></span><span class="island-glow"></span><span class="island-art">${taskGift(prize.icon)}</span></button><span class="road-node road-node-prize" data-road>${icon3d('crown','','gold')}</span><button class="road-card road-card-prize" data-details="${esc(prize.id)}"><span class="road-card-body"><small>MAIN PRIZE · ${doneCount}/${tasks.length}</small><strong>${esc(prize.title)}</strong><span>Complete the route and unlock the featured collectible.</span></span><span class="road-card-end">${icon('arrow')}</span></button>`:''}</div>
     </section>`;
   }
   drawRoad() {
     const road=this.root?.querySelector('.road');if(!road)return;
     const svg=road.querySelector('.road-svg'),box=road.getBoundingClientRect();
-    const nodes=[...road.querySelectorAll('[data-road]')].reverse();
+    const nodes=[...road.querySelectorAll('[data-road]')];
     if(nodes.length<2||!box.width)return;
     const pts=nodes.map(el=>{const r=el.getBoundingClientRect();return [r.left-box.left+r.width/2,r.top-box.top+r.height/2];});
     let d=`M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
